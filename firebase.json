@@ -1,10 +1,4 @@
 {
-    "hosting": {
-        "rewrites": [{
-            "source": "/",
-            "function": "app"
-        }]
-    },
     "storage": {
         "rules": "storage.rules"
     }
