@@ -1,9 +1,35 @@
 {
     "rules": {
-        ".read": "auth != null",
-        ".write": "auth != null",
+        "bars": {
+
+        },
         "bars_location": {
-            ".indexOn": "g"
+            
+        },
+        "bars_users_in": {
+
+        },
+        "chats": {
+            "$user_uid": {
+                ".read": "auth.uid == $user_uid",
+                ".write": false
+            }
+        },
+        "messages": {
+            "$chat_uid": {
+                ".read": "root.child('chats').child(auth.uid).hasChild($chat_uid)",
+                ".write": "root.child('chats').child(auth.uid).hasChild($chat_uid)"
+            }
+        },
+        "unread_messages": {
+            ".read": false,
+            ".write": false
+        },
+        "users": {
+            "$user_uid": {
+                ".read": "auth != null",
+                ".write": "auth.uid == $user_uid"
+            }
         }
     }
 }
