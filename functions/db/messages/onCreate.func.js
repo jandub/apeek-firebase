@@ -56,7 +56,7 @@ const handleEvent = event => {
         case consts.MSG_TYPE_DENIED:
             return handleDenied(event);
         case consts.MSG_TYPE_MESSAGE:
-            break;
+            return handleMessage(event);
     }
 }
 
@@ -119,6 +119,13 @@ const handleDenied = event => {
     const msg = event.data.val();
 
     return updateChats(chatId, msg, consts.CHAT_STATUS_DENIED);
+};
+
+const handleMessage = event => {
+    const chatId = event.params.chatId;
+    const msg = event.data.val();
+
+    return updateChats(chatId, msg);
 };
 
 const updateChats = (chatId, msg, newStatus = null) => {
