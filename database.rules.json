@@ -1,13 +1,16 @@
 {
     "rules": {
         "bars": {
-
+            ".read": true,
+            ".write": true
         },
         "bars_location": {
-            
+            ".read": true,
+            ".write": true
         },
         "bars_users_in": {
-
+            ".read": true,
+            ".write": true
         },
         "chats": {
             "$user_uid": {
