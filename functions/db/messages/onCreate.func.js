@@ -52,9 +52,9 @@ const handleEvent = event => {
         case consts.MSG_TYPE_REQUEST:
             return handleRequest(event);
         case consts.MSG_TYPE_APPROVED:
-            break;
+            return handleApproved(event);
         case consts.MSG_TYPE_DENIED:
-            break;
+            return handleDenied(event);
         case consts.MSG_TYPE_MESSAGE:
             break;
     }
@@ -77,15 +77,19 @@ const handleRequest = event => {
             recipientSnap = snapshot;
 
             const chatRef = db.ref(`/chats/${msg.recipientId}`);
-            const chatToSave = getNewChatObject(msg.senderId, senderSnap, msg);
+            const chatToSave = {};
 
-            return chatRef.set({chatId: chatToSave});
+            chatToSave[chatId] = getNewChatObject(msg.senderId, senderSnap, msg);
+
+            return chatRef.set(chatToSave);
         })
         .then(() => {
             const chatRef = db.ref(`/chats/${msg.senderId}`);
-            const chatToSave = getNewChatObject(msg.recipientId, recipientSnap, msg);
+            const chatToSave = {};
 
-            return chatRef.set({chatId: chatToSave});
+            chatToSave[chatId] = getNewChatObject(msg.recipientId, recipientSnap, msg);
+
+            return chatRef.set(chatToSave);
         });
 };
 
@@ -101,4 +105,51 @@ const getNewChatObject = (userId, userSnap, msg) => {
         'lastMsgText': msg.text,
         'lastMsgSenderId': msg.senderId
     };
+};
+
+const handleApproved = event => {
+    const chatId = event.params.chatId;
+    const msg = event.data.val();
+
+    return updateChats(chatId, msg, consts.CHAT_STATUS_APPROVED);
+};
+
+const handleDenied = event => {
+    const chatId = event.params.chatId;
+    const msg = event.data.val();
+
+    return updateChats(chatId, msg, consts.CHAT_STATUS_DENIED);
+};
+
+const updateChats = (chatId, msg, newStatus = null) => {
+    const db = admin.database();
+
+    return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
+        .then(chatSnap => {
+            const chat = updateChatNode(chatSnap, msg, newStatus); 
+
+            return chatSnap.ref.update(chat);
+        })
+        .then(() => {
+            return db.ref(`/chats/${msg.recipientId}/${chatId}`).once('value');
+        })
+        .then(chatSnap => {
+            const chat = updateChatNode(chatSnap, msg, newStatus); 
+
+            return chatSnap.ref.update(chat);
+        });
+};
+
+const updateChatNode = (chatSnap, msg, newStatus) => {
+    const chat = chatSnap.val();
+
+    if (newStatus) {
+        chat.status = newStatus;
+    }
+
+    chat.lastMsgTs = msg.ts;
+    chat.lastMsgText = msg.text;
+    chat.lastMsgSenderId = msg.senderId;
+
+    return chat;
 };

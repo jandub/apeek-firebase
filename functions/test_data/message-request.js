@@ -5,4 +5,4 @@ dbMessagesOnCreate({
     ts: 1234567890,
     type: 'request',
     status: 'sent'
-});
+}, {params: {chatId: 'test_chat_id', messageId: 'test_msg_req_id'}});
