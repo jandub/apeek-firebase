@@ -42,7 +42,7 @@ const markAsDelivered = event => {
     const msg = event.data.val();
     msg.status = consts.MSG_STATUS_DELIVERED;
 
-    return event.data.ref.update(msg);
+    return event.data.adminRef.update(msg);
 }
 
 const handleEvent = event => {
