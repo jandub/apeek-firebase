@@ -2,10 +2,11 @@
     "name": "Apeek",
     "description": "Apeek firebase",
     "scripts": {
-        "serve": "firebase serve --only functions",
         "shell": "firebase experimental:functions:shell",
-        "start": "npm run shell",
-        "deploy": "firebase deploy --only functions",
+        "build": "node_modules/.bin/firebase-bolt ../database.rules.bolt --output ../database.rules.json",
+        "deploy": "firebase deploy",
+        "deploy:database": "firebase deploy --only database",
+        "deploy:functions": "firebase deploy --only functions",
         "logs": "firebase functions:log"
     },
     "dependencies": {
@@ -14,5 +15,8 @@
         "firebase-functions": "^0.8.1",
         "glob": "^7.1.2"
     },
-    "private": true
+    "private": true,
+    "devDependencies": {
+        "firebase-bolt": "^0.8.2"
+    }
 }

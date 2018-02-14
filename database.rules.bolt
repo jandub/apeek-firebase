@@ -1,0 +1,199 @@
+/*
+ *  Bars
+ */
+path /bars {
+    read() { 
+        isLoggedIn()
+    }
+    write() { 
+        isLoggedIn()
+    }
+}
+
+/*
+ *  Bars location
+ */
+path /bars_location {
+    read() {
+        isLoggedIn()
+    }
+    write() {
+        isLoggedIn()
+    }
+}
+
+/*
+ *  Bars users in
+ */
+path /bars_users_in {
+    read() {
+        isLoggedIn()
+    }
+    write() {
+        isLoggedIn()
+    }
+}
+
+/*
+ *  Chats
+ */
+path /chats/{user_uid} {
+    // users can only read their own conversations
+    read() {
+        isCurrentUser(user_uid)
+    }
+    // writes are handled by firebase functions as admin
+    write() {
+        false
+    }
+}
+
+/*
+ *  Messages
+ */
+path /messages/{chat_uid}/{message_uid} is Message {
+    // User needs to be logged in and be in the chat
+    read() {
+        isLoggedIn() && isInChat(chat_uid)
+    }
+    // User needs to be logged in and his id should be 
+    // equal to sender id
+    // The type of message needs to match up to chat node status:
+    //      - request - chat node doesn't exist
+    //      - approved/denied - chat node has status 'pending'
+    //      - message - chat node has status 'approved'
+    // For the approved/denied messages we also need to check 
+    // if user sending this message is different from the one 
+    // sending request for chat
+    create() {
+        isLoggedIn() && 
+        this.senderId == auth.uid &&
+        this.status == 'sent' && 
+        (
+            (this.type == 'request' && !isInChat(chat_uid)) ||
+            (this.type == 'message' && chatHasStatus(chat_uid, 'approved')) ||
+            (
+                (this.type == 'approved' || this.type == 'denied') && 
+                chatHasStatus(chat_uid, 'pending') && 
+                !sentLastMessageInChat(chat_uid)
+            )
+        )
+    }
+    // the only possible update is changing status of message
+    // from 'delivered' to 'read'
+    // message must be addressed to the auth user
+    update() {
+        isLoggedIn() && 
+        this.recipientId == auth.uid && 
+        prior(this.senderId) == this.senderId &&
+        prior(this.recipientId) == this.recipientId &&
+        prior(this.text) == this.text &&
+        prior(this.ts) == this.ts &&
+        prior(this.type) == this.type &&
+        prior(this.status) == 'sent' &&
+        this.status == 'delivered'
+    }
+    // messages can't be deleted
+    delete() {
+        false
+    }
+}
+
+/*
+ *  Unread messages
+ *  Private node for firebase functions
+ *  Used to send push notifications
+ */
+path /unread_messages {
+    read() {
+        false
+    }
+    write() {
+        false
+    }
+}
+
+/*
+ *  Users
+ */
+path /users/{user_uid} {
+    // users can see all profiles
+    read() {
+        isLoggedIn()
+    }
+    // user can write only in their own profile
+    write() {
+        isCurrentUser(user_uid)
+    }
+}
+
+/*
+ *  Types
+ */
+type Message {
+    senderId: UserId,
+    recipientId: UserId,
+    text: String,
+    ts: Timestamp,
+    type: MessageType,
+    status: MessageStatus
+}
+
+// UserId - checks if user node with given uid exists
+type UserId extends String {
+    validate() {
+        root.users[this] != null
+    }
+}
+
+// Timestamp - use firebase SDK to get it from server on clients
+// See firebase.database.ServerValue.TIMESTAMP
+type Timestamp extends Number {
+    validate() {
+        this > 0 && this <= now
+    }
+}
+
+// Allowed message types
+// See constants.js
+type MessageType extends String {
+    validate() {
+        this == 'request' || 
+        this == 'message' ||
+        this == 'approved' || 
+        this == 'denied'
+    }
+}
+
+// Allowed message statuses
+// See constants.js
+type MessageStatus extends String {
+    validate() {
+        this == 'sent' || 
+        this == 'delivered' ||
+        this == 'read'
+    }
+}
+
+/*
+ *  Functions
+ */
+isLoggedIn() { 
+    auth != null
+}
+
+isCurrentUser(uid) { 
+    auth != null && auth.uid == uid
+}
+
+isInChat(chat_uid) {
+    root.chats[auth.uid][chat_uid] != null
+}
+
+chatHasStatus(chat_uid, status) {
+    root.chats[auth.uid][chat_uid].status == status;
+}
+
+sentLastMessageInChat(chat_uid) {
+    root.chats[auth.uid][chat_uid].lastMsgSenderId == auth.uid
+}

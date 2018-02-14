@@ -1,38 +1,57 @@
 {
-    "rules": {
-        "bars": {
-            ".read": true,
-            ".write": true
-        },
-        "bars_location": {
-            ".read": true,
-            ".write": true
-        },
-        "bars_users_in": {
-            ".read": true,
-            ".write": true
-        },
-        "chats": {
-            "$user_uid": {
-                ".read": "auth.uid == $user_uid",
-                ".write": false
-            }
-        },
-        "messages": {
-            "$chat_uid": {
-                ".read": "root.child('chats').child(auth.uid).hasChild($chat_uid)",
-                ".write": "root.child('chats').child(auth.uid).hasChild($chat_uid)"
-            }
-        },
-        "unread_messages": {
-            ".read": false,
-            ".write": false
-        },
-        "users": {
-            "$user_uid": {
-                ".read": "auth != null",
-                ".write": "auth.uid == $user_uid"
-            }
+  "rules": {
+    "bars": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "bars_location": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "bars_users_in": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "chats": {
+      "$user_uid": {
+        ".read": "auth != null && auth.uid == $user_uid"
+      }
+    },
+    "messages": {
+      "$chat_uid": {
+        "$message_uid": {
+          ".validate": "newData.hasChildren(['senderId', 'recipientId', 'text', 'ts', 'type', 'status'])",
+          "senderId": {
+            ".validate": "newData.isString() && newData.parent().parent().parent().parent().child('users').child(newData.val()).val() != null"
+          },
+          "recipientId": {
+            ".validate": "newData.isString() && newData.parent().parent().parent().parent().child('users').child(newData.val()).val() != null"
+          },
+          "text": {
+            ".validate": "newData.isString()"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now"
+          },
+          "type": {
+            ".validate": "newData.isString() && (newData.val() == 'request' || newData.val() == 'message' || newData.val() == 'approved' || newData.val() == 'denied')"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() == 'sent' || newData.val() == 'delivered' || newData.val() == 'read')"
+          },
+          "$other": {
+            ".validate": "false"
+          },
+          ".write": "data.val() == null && auth != null && newData.child('senderId').val() == auth.uid && newData.child('status').val() == 'sent' && (newData.child('type').val() == 'request' && !(newData.parent().parent().parent().child('chats').child(auth.uid).child($chat_uid).val() != null) || newData.child('type').val() == 'message' && newData.parent().parent().parent().child('chats').child(auth.uid).child($chat_uid).child('status').val() == 'approved' || (newData.child('type').val() == 'approved' || newData.child('type').val() == 'denied') && newData.parent().parent().parent().child('chats').child(auth.uid).child($chat_uid).child('status').val() == 'pending' && !(newData.parent().parent().parent().child('chats').child(auth.uid).child($chat_uid).child('lastMsgSenderId').val() == auth.uid)) || data.val() != null && newData.val() != null && auth != null && newData.child('recipientId').val() == auth.uid && data.child('senderId').val() == newData.child('senderId').val() && data.child('recipientId').val() == newData.child('recipientId').val() && data.child('text').val() == newData.child('text').val() && data.child('ts').val() == newData.child('ts').val() && data.child('type').val() == newData.child('type').val() && data.child('status').val() == 'sent' && newData.child('status').val() == 'delivered'",
+          ".read": "auth != null && root.child('chats').child(auth.uid).child($chat_uid).val() != null"
         }
+      }
+    },
+    "users": {
+      "$user_uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $user_uid"
+      }
     }
+  }
 }
