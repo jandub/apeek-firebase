@@ -1,0 +1,20 @@
+{
+    "name": "apeek-firebase",
+    "version": "1.0.0",
+    "description": "Apeek Firebase",
+    "scripts": {
+        "shell": "node_modules/.bin/firebase experimental:functions:shell",
+        "build": "node_modules/.bin/firebase-bolt database/database.rules.bolt --output database/database.rules.json",
+        "deploy": "node_modules/.bin/firebase deploy",
+        "deploy:database": "node_modules/.bin/firebase deploy --only database",
+        "deploy:functions": "node_modules/.bin/firebase deploy --only functions",
+        "deploy:storage": "node_modules/.bin/firebase deploy --only storage",
+        "logs": "node_modules/.bin/firebase functions:log",
+        "install": "cd functions && npm install && cd .."
+    },
+    "devDependencies": {
+        "firebase-tools": "^3.17.4",
+        "firebase-bolt": "^0.8.2"
+    },
+    "private": true
+}
