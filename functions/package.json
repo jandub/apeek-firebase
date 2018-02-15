@@ -1,4 +1,5 @@
 {
+    "//": "See https://github.com/firebase/firebase-tools/issues/403#issuecomment-344698406",
     "name": "apeek-firebase-functions",
     "description": "Apeek Firebase Functions",
     "dependencies": {
