@@ -6,16 +6,16 @@
  *  
  *  Request
  *  Request for chatting. Creates a chat node for both users in
- *  /chats/{senderId}/{chatId} and /chats/{receiverId}/{chatId} with 
+ *  /chats/{senderId}/{chatId} and /chats/{recipientId}/{chatId} with 
  *  chat status set to pending.
- *  
- *  Message
- *  Updates the chat nodes with the last message information -
- *  text, sender and timestamp.
  *  
  *  Approved/Denied
  *  Approves or denies the request for chatting. Updates the status of 
  *  chat nodes to approved/denied.
+ *  
+ *  Message
+ *  Updates the chat nodes with the last message information -
+ *  text, sender and timestamp.
  */
 
 const functions = require('firebase-functions');
@@ -76,25 +76,22 @@ const handleRequest = event => {
         .then(snapshot => {
             recipientSnap = snapshot;
 
-            const chatRef = db.ref(`/chats/${msg.recipientId}`);
             const chatToSave = {};
+            chatToSave[chatId] = getNewChatObject(senderSnap, msg);
 
-            chatToSave[chatId] = getNewChatObject(msg.senderId, senderSnap, msg);
-
-            return chatRef.set(chatToSave);
+            return db.ref(`/chats/${msg.recipientId}`).set(chatToSave);
         })
         .then(() => {
-            const chatRef = db.ref(`/chats/${msg.senderId}`);
             const chatToSave = {};
+            chatToSave[chatId] = getNewChatObject(recipientSnap, msg);
 
-            chatToSave[chatId] = getNewChatObject(msg.recipientId, recipientSnap, msg);
-
-            return chatRef.set(chatToSave);
+            return db.ref(`/chats/${msg.senderId}`).set(chatToSave);
         });
 };
 
-const getNewChatObject = (userId, userSnap, msg) => {
+const getNewChatObject = (userSnap, msg) => {
     const user = userSnap.val();
+    const userId = userSnap.key;
 
     return {
         'recipientId': userId,
@@ -108,32 +105,25 @@ const getNewChatObject = (userId, userSnap, msg) => {
 };
 
 const handleApproved = event => {
-    const chatId = event.params.chatId;
-    const msg = event.data.val();
-
-    return updateChats(chatId, msg, consts.CHAT_STATUS_APPROVED);
+    return updateChats(event, consts.CHAT_STATUS_APPROVED);
 };
 
 const handleDenied = event => {
-    const chatId = event.params.chatId;
-    const msg = event.data.val();
-
-    return updateChats(chatId, msg, consts.CHAT_STATUS_DENIED);
+    return updateChats(event, consts.CHAT_STATUS_DENIED);
 };
 
 const handleMessage = event => {
+    return updateChats(event);
+};
+
+const updateChats = (event, newStatus = null) => {
+    const db = admin.database();
     const chatId = event.params.chatId;
     const msg = event.data.val();
 
-    return updateChats(chatId, msg);
-};
-
-const updateChats = (chatId, msg, newStatus = null) => {
-    const db = admin.database();
-
     return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
         .then(chatSnap => {
-            const chat = updateChatNode(chatSnap, msg, newStatus); 
+            const chat = getUpdatedChatObject(chatSnap, msg, newStatus); 
 
             return chatSnap.ref.update(chat);
         })
@@ -141,13 +131,13 @@ const updateChats = (chatId, msg, newStatus = null) => {
             return db.ref(`/chats/${msg.recipientId}/${chatId}`).once('value');
         })
         .then(chatSnap => {
-            const chat = updateChatNode(chatSnap, msg, newStatus); 
+            const chat = getUpdatedChatObject(chatSnap, msg, newStatus); 
 
             return chatSnap.ref.update(chat);
         });
 };
 
-const updateChatNode = (chatSnap, msg, newStatus) => {
+const getUpdatedChatObject = (chatSnap, msg, newStatus) => {
     const chat = chatSnap.val();
 
     if (newStatus) {
