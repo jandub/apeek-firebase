@@ -10,11 +10,15 @@
         "deploy:functions": "node_modules/.bin/firebase deploy --only functions",
         "deploy:storage": "node_modules/.bin/firebase deploy --only storage",
         "logs": "node_modules/.bin/firebase functions:log",
-        "install": "cd functions && npm install && cd .."
+        "install": "cd functions && npm install && cd ..",
+        "test": "node_modules/.bin/mocha \"test/rules/**/*.test.js\""
     },
     "devDependencies": {
+        "chai": "^4.1.2",
+        "firebase-bolt": "^0.8.2",
         "firebase-tools": "^3.17.4",
-        "firebase-bolt": "^0.8.2"
+        "mocha": "^5.0.1",
+        "targaryen": "^3.0.5"
     },
     "private": true
 }
