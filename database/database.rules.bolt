@@ -68,6 +68,7 @@ path /messages/{chat_uid}/{message_uid} is Message {
     create() {
         isLoggedIn() && 
         this.senderId == auth.uid &&
+        this.senderId != this.recipientId &&
         this.status == 'sent' && 
         (
             (this.type == 'request' && !isInChat(chat_uid)) ||
@@ -90,8 +91,8 @@ path /messages/{chat_uid}/{message_uid} is Message {
         prior(this.text) == this.text &&
         prior(this.ts) == this.ts &&
         prior(this.type) == this.type &&
-        prior(this.status) == 'sent' &&
-        this.status == 'delivered'
+        prior(this.status) == 'delivered' &&
+        this.status == 'read'
     }
     // messages can't be deleted
     delete() {
