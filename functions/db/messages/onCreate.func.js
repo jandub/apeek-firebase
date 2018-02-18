@@ -39,10 +39,7 @@ module.exports = functions.database
     });
 
 const markAsDelivered = event => {
-    const msg = event.data.val();
-    msg.status = consts.MSG_STATUS_DELIVERED;
-
-    return event.data.adminRef.update(msg);
+    return event.data.adminRef.update({status: consts.MSG_STATUS_DELIVERED});
 }
 
 const handleEvent = event => {
@@ -76,16 +73,12 @@ const handleRequest = event => {
         .then(snapshot => {
             recipientSnap = snapshot;
 
-            const chatToSave = {};
-            chatToSave[chatId] = getNewChatObject(senderSnap, msg);
-
-            return db.ref(`/chats/${msg.recipientId}`).set(chatToSave);
+            const chatToSave = getNewChatObject(senderSnap, msg);
+            return db.ref(`/chats/${msg.recipientId}/${chatId}`).set(chatToSave);
         })
         .then(() => {
-            const chatToSave = {};
-            chatToSave[chatId] = getNewChatObject(recipientSnap, msg);
-
-            return db.ref(`/chats/${msg.senderId}`).set(chatToSave);
+            const chatToSave = getNewChatObject(recipientSnap, msg);
+            return db.ref(`/chats/${msg.senderId}/${chatId}`).set(chatToSave);
         });
 };
 
