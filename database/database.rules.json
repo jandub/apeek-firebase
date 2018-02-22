@@ -49,8 +49,70 @@
     },
     "users": {
       "$user_uid": {
-        ".read": "auth != null",
-        ".write": "auth != null && auth.uid == $user_uid"
+        "profile": {
+          ".validate": "newData.hasChildren(['firstName', 'lastName', 'gender', 'interests', 'about', 'photos'])",
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid == $user_uid",
+          "firstName": {
+            ".validate": "newData.isString()"
+          },
+          "lastName": {
+            ".validate": "newData.isString()"
+          },
+          "gender": {
+            ".validate": "newData.isString() && (newData.val() == 'male' || newData.val() == 'female')"
+          },
+          "interests": {
+            ".validate": "newData.isString()"
+          },
+          "about": {
+            ".validate": "newData.isString()"
+          },
+          "barId": {
+            ".validate": "newData.isString() && newData.parent().parent().parent().parent().child('bars').child(newData.val()).val() != null"
+          },
+          "photos": {
+            ".validate": "newData.hasChildren(['photo1'])",
+            "photo1": {
+              ".validate": "newData.isString()"
+            },
+            "photo2": {
+              ".validate": "newData.isString()"
+            },
+            "photo3": {
+              ".validate": "newData.isString()"
+            },
+            "photo4": {
+              ".validate": "newData.isString()"
+            },
+            "photo5": {
+              ".validate": "newData.isString()"
+            },
+            "photo6": {
+              ".validate": "newData.isString()"
+            },
+            "$other": {
+              ".validate": "false"
+            }
+          },
+          "$other": {
+            ".validate": "false"
+          }
+        },
+        "meta": {
+          ".validate": "false",
+          ".read": "false",
+          ".write": "false"
+        },
+        "location": {
+          ".validate": "newData.hasChildren()",
+          ".read": "auth != null && auth.uid == $user_uid",
+          ".write": "auth != null && auth.uid == $user_uid"
+        },
+        ".validate": "newData.hasChildren(['profile'])",
+        "$other": {
+          ".validate": "false"
+        }
       }
     }
   }

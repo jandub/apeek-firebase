@@ -36,6 +36,7 @@ path /bars_users_in {
 
 /*
  *  Chats
+ *  No validation needed - only firebase functions write here
  */
 path /chats/{user_uid} {
     // users can only read their own conversations
@@ -117,14 +118,34 @@ path /unread_messages {
 /*
  *  Users
  */
-path /users/{user_uid} {
-    // users can see all profiles
-    read() {
-        isLoggedIn()
+path /users/{user_uid} is User {
+    /profile {
+        // users can see all profiles
+        read() {
+            isLoggedIn()
+        }
+        // user can write only in their own profile
+        write() {
+            isCurrentUser(user_uid)
+        }
     }
-    // user can write only in their own profile
-    write() {
-        isCurrentUser(user_uid)
+    /meta {
+        // only for firebase functions as admin
+        read() {
+            false
+        }
+        write() {
+            false
+        }
+    }
+    /location {
+        // location is read/write only for user that owns it
+        read() {
+            isCurrentUser(user_uid)
+        }
+        write() {
+            isCurrentUser(user_uid)
+        }
     }
 }
 
@@ -138,6 +159,23 @@ type Message {
     ts: Timestamp,
     type: MessageType,
     status: MessageStatus
+}
+
+type User {
+    profile: UserProfile,
+    // no need to validate, only for server
+    meta: Null,
+    location: UserLocation | Null
+}
+
+type UserProfile {
+    firstName: String,
+    lastName: String,
+    gender: Gender,
+    interests: String,
+    about: String,
+    barId: BarId | Null,
+    photos: UserPhotos
 }
 
 // UserId - checks if user node with given uid exists
@@ -175,6 +213,43 @@ type MessageStatus extends String {
         this == 'read'
     }
 }
+
+// Users gender
+// See constants.js
+type Gender extends String {
+    validate() {
+        this == 'male' || 
+        this == 'female'
+    }
+}
+
+type BarId extends String {
+    validate() {
+        root.bars[this] != null
+    }
+}
+
+type UserPhotos {
+    'photo1': StorageLink,
+    'photo2': StorageLink | Null,
+    'photo3': StorageLink | Null,
+    'photo4': StorageLink | Null,
+    'photo5': StorageLink | Null,
+    'photo6': StorageLink | Null,
+}
+
+type StorageLink extends String {
+    //validate() {
+    //    // TODO
+    //}
+}
+
+type UserLocation extends Object {
+    //validate() {
+    //    // TODO
+    //}
+}
+
 
 /*
  *  Functions

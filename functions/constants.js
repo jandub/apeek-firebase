@@ -15,4 +15,7 @@ module.exports = {
     "CHAT_STATUS_PENDING": "pending",
     "CHAT_STATUS_DENIED": "denied",
     "CHAT_STATUS_APPROVED": "approved",
+
+    "GENDER_MALE": "male",
+    "GENDER_FEMALE": "female",
 };
