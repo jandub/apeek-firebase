@@ -13,9 +13,9 @@
  *  Approves or denies the request for chatting. Updates the status of 
  *  chat nodes to approved/denied.
  *  
- *  Message
+ *  All messages
  *  Updates the chat nodes with the last message information -
- *  text, sender and timestamp.
+ *  text, sender, timestamp and status.
  */
 
 const functions = require('firebase-functions');
@@ -87,13 +87,14 @@ const getNewChatObject = (userSnap, msg) => {
     const userId = userSnap.ref.parent.key;
 
     return {
-        'recipientId': userId,
-        'recipientName': user.firstName,
-        'recipientUserPhoto': user.photos.photo1,
-        'status': consts.CHAT_STATUS_PENDING,
-        'lastMsgTs': msg.ts,
-        'lastMsgText': msg.text,
-        'lastMsgSenderId': msg.senderId
+        recipientId: userId,
+        recipientName: user.firstName,
+        recipientUserPhoto: user.photos.photo1,
+        status: consts.CHAT_STATUS_PENDING,
+        lastMsgTs: msg.ts,
+        lastMsgText: msg.text,
+        lastMsgSenderId: msg.senderId,
+        lastMsgStatus: consts.MSG_STATUS_DELIVERED
     };
 };
 
@@ -114,32 +115,25 @@ const updateChats = (event, newStatus = null) => {
     const chatId = event.params.chatId;
     const msg = event.data.val();
 
-    return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
-        .then(chatSnap => {
-            const chat = getUpdatedChatObject(chatSnap, msg, newStatus); 
+    const chat = getUpdateChatObject(msg, newStatus); 
 
-            return chatSnap.ref.update(chat);
-        })
+    return db.ref(`/chats/${msg.senderId}/${chatId}`).update(chat)
         .then(() => {
-            return db.ref(`/chats/${msg.recipientId}/${chatId}`).once('value');
-        })
-        .then(chatSnap => {
-            const chat = getUpdatedChatObject(chatSnap, msg, newStatus); 
-
-            return chatSnap.ref.update(chat);
+            return db.ref(`/chats/${msg.recipientId}/${chatId}`).update(chat);
         });
 };
 
-const getUpdatedChatObject = (chatSnap, msg, newStatus) => {
-    const chat = chatSnap.val();
+const getUpdateChatObject = (msg, newStatus) => {
+    const chat = {
+        lastMsgTs: msg.ts,
+        lastMsgText: msg.text,
+        lastMsgSenderId: msg.senderId,
+        lastMsgStatus: consts.MSG_STATUS_DELIVERED
+    };
 
     if (newStatus) {
         chat.status = newStatus;
     }
-
-    chat.lastMsgTs = msg.ts;
-    chat.lastMsgText = msg.text;
-    chat.lastMsgSenderId = msg.senderId;
 
     return chat;
 };
