@@ -65,10 +65,10 @@ const handleRequest = event => {
     let senderSnap = null;
     let recipientSnap = null;
 
-    return db.ref(`/users/${msg.senderId}`).once('value')
+    return db.ref(`/users/${msg.senderId}/profile`).once('value')
         .then(snapshot => {
             senderSnap = snapshot;
-            return db.ref(`/users/${msg.recipientId}`).once('value');
+            return db.ref(`/users/${msg.recipientId}/profile`).once('value');
         })
         .then(snapshot => {
             recipientSnap = snapshot;
@@ -84,12 +84,12 @@ const handleRequest = event => {
 
 const getNewChatObject = (userSnap, msg) => {
     const user = userSnap.val();
-    const userId = userSnap.key;
+    const userId = userSnap.ref.parent.key;
 
     return {
         'recipientId': userId,
         'recipientName': user.firstName,
-        'recipientUserPhoto': user.photos[0],
+        'recipientUserPhoto': user.photos.photo1,
         'status': consts.CHAT_STATUS_PENDING,
         'lastMsgTs': msg.ts,
         'lastMsgText': msg.text,
