@@ -386,13 +386,19 @@ describe('Messages rules - validation', () => {
 
     it('Should validate senderId', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
-        msg.senderId = 'user4';
 
+        msg.senderId = null;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.senderId = 'user4';
         expect({uid: 'user4'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
     });
 
     it('Should validate recipientId', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
+
+        msg.recipientId = null;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
 
         msg.recipientId = 'user4';
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
@@ -401,37 +407,64 @@ describe('Messages rules - validation', () => {
     it('Should validate text', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
 
+        msg.text = null;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
         msg.text = 123;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.text = {test: 'data'};
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
     });
 
     it('Should validate timestamp', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
 
-        msg.text = -123;
+        msg.ts = null;
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
 
-        msg.text = 999999999999;
+        msg.ts = '123';
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.ts = {test: 'data'};
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.ts = -123;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.ts = Date.now + 999;
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
     });
 
     it('Should validate status', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
 
+        msg.status = null;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
         msg.status = 123;
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
 
         msg.status = 'abc';
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.status = {test: 'data'};
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
     });
 
     it('Should validate type', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
 
+        msg.type = null;
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
         msg.type = 123;
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
 
         msg.type = 'abc';
+        expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
+
+        msg.type = {test: 'data'};
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req_id');
     });
 });
