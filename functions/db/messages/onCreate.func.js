@@ -40,7 +40,7 @@ module.exports = functions.database
 
 const markAsDelivered = event => {
     return event.data.adminRef.update({status: consts.MSG_STATUS_DELIVERED});
-}
+};
 
 const handleEvent = event => {
     const msg = event.data.val();
@@ -55,7 +55,7 @@ const handleEvent = event => {
         case consts.MSG_TYPE_MESSAGE:
             return handleMessage(event);
     }
-}
+};
 
 const handleRequest = event => {
     const db = admin.database();

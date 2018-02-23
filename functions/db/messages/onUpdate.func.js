@@ -47,4 +47,4 @@ const updateChats = event => {
         .then(() => {
             return db.ref(`chats/${msg.senderId}/${chatId}`).update(chat);
         });
-}
+};
