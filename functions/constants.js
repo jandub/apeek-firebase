@@ -18,4 +18,6 @@ module.exports = {
 
     "GENDER_MALE": "male",
     "GENDER_FEMALE": "female",
+
+    "STORAGE_PHOTOS": "user_photos"
 };
