@@ -85,11 +85,16 @@ const handleRequest = event => {
 const getNewChatObject = (userSnap, msg) => {
     const user = userSnap.val();
     const userId = userSnap.ref.parent.key;
+    let photo = null;
+
+    if (!!user.photos && !!user.photos[0]) {
+        photo = user.photos[0];
+    }
 
     return {
         recipientId: userId,
         recipientName: user.firstName,
-        recipientUserPhoto: user.photos.photo1,
+        recipientUserPhoto: photo,
         status: consts.CHAT_STATUS_PENDING,
         lastMsgTs: msg.ts,
         lastMsgText: msg.text,
