@@ -169,13 +169,16 @@ type User {
 }
 
 type UserProfile {
+    uid: ProfileUserId,
     firstName: String,
     lastName: String,
     gender: Gender,
     interests: String,
     about: String,
     barId: BarId | Null,
-    photos: UserPhotos
+    // Array is saved as object - ['test'] => {'0' => 'test'}
+    // See https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
+    photos: Map<PhotoKey, StorageLink>
 }
 
 // UserId - checks if user node with given uid exists
@@ -229,13 +232,21 @@ type BarId extends String {
     }
 }
 
-type UserPhotos {
-    'photo1': StorageLink,
-    'photo2': StorageLink | Null,
-    'photo3': StorageLink | Null,
-    'photo4': StorageLink | Null,
-    'photo5': StorageLink | Null,
-    'photo6': StorageLink | Null,
+type ProfileUserId extends String {
+    validate() {
+       user_uid == this;
+    }
+}
+
+type PhotoKey extends String {
+    validate() {
+        this == "0" ||
+        this == "1" ||
+        this == "2" ||
+        this == "3" ||
+        this == "4" ||
+        this == "5"
+    }
 }
 
 type StorageLink extends String {

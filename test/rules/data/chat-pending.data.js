@@ -9,14 +9,13 @@ module.exports = {
     users: {
         user1: {
             profile: {
+                uid: 'user1',
                 firstName: 'Firstname1',
                 lastName: 'Lastname1',
                 gender: consts.GENDER_MALE,
                 interests: 'Some interests 1...',
                 about: 'Something about user1...',
-                photos: {
-                    photo1: 'photolink'
-                }
+                photos: ['photolink']
             },
             meta: {
                 email: 'user1@email.com'
@@ -27,16 +26,13 @@ module.exports = {
         },
         user2: {
             profile: {
+                uid: 'user2',
                 firstName: 'Firstname2',
                 lastName: 'Lastname2',
                 gender: consts.GENDER_FEMALE,
                 interests: 'Some interests 2...',
                 about: 'Something about user2...',
-                photos: {
-                    photo1: 'photolink',
-                    photo2: 'photolink',
-                    photo3: 'photolink'
-                }
+                photos: ['photolink1', 'photolink2', 'photolink3']
             },
 
             meta: {
@@ -48,19 +44,16 @@ module.exports = {
         },
         user3: {
             profile: {
+                uid: 'user3',
                 firstName: 'Firstname3',
                 lastName: 'Lastname3',
                 gender: consts.GENDER_MALE,
                 interests: 'Some interests 3...',
                 about: 'Something about user3...',
-                photos: {
-                    photo1: 'photolink',
-                    photo2: 'photolink',
-                    photo3: 'photolink',
-                    photo4: 'photolink',
-                    photo5: 'photolink',
-                    photo6: 'photolink'
-                }
+                photos: [
+                    'photolink1', 'photolink2', 'photolink3', 
+                    'photolink4', 'photolink5', 'photolink6'
+                ]
             },
             meta: {
                 email: 'user3@email.com'

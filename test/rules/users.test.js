@@ -10,14 +10,13 @@ const rules = targaryen.json.loadSync(PATH_RULES);
 
 const getProfile = () => {
     return {
-        firstName: 'Firstname4',
-        lastName: 'Lastname4',
+        uid: 'user1',
+        firstName: 'Firstname1',
+        lastName: 'Lastname1',
         gender: 'male',
-        interests: 'Some interests 4...',
-        about: 'Something about user4...',
-        photos: {
-            photo1: 'photolink'
-        }
+        interests: 'Some interests 1...',
+        about: 'Something about user1...',
+        photos: ['photolink']
     };
 }
 
@@ -164,6 +163,13 @@ describe('Users rules - validation', () => {
         expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
     });
 
+    it('Should validate uid', () => {
+        const profile = getProfile();
+
+        profile.uid = 'user2';
+        expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+    });
+
     it('Should validate firstName', () => {
         const profile = getProfile();
 
@@ -232,13 +238,19 @@ describe('Users rules - validation', () => {
     it('Should validate photos', () => {
         const profile = getProfile();
 
-        profile.photos = {photo7: 'photolink'};
+        profile.photos = ['1', '2', '3', '4', '5', '6', '7'];
+        expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+
+        profile.photos = {'6': 'test'};
         expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
         
         profile.photos = 'Some string';
         expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
 
         profile.photos = null;
-        expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+        expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
+
+        profile.photos = [];
+        expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
     });
 });
