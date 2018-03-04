@@ -99,7 +99,8 @@ const getNewChatObject = (userSnap, msg) => {
         lastMsgTs: msg.ts,
         lastMsgText: msg.text,
         lastMsgSenderId: msg.senderId,
-        lastMsgStatus: consts.MSG_STATUS_DELIVERED
+        lastMsgStatus: consts.MSG_STATUS_DELIVERED,
+        lastMsgType: msg.type
     };
 };
 
@@ -133,7 +134,8 @@ const getUpdateChatObject = (msg, newStatus) => {
         lastMsgTs: msg.ts,
         lastMsgText: msg.text,
         lastMsgSenderId: msg.senderId,
-        lastMsgStatus: consts.MSG_STATUS_DELIVERED
+        lastMsgStatus: consts.MSG_STATUS_DELIVERED,
+        lastMsgType: msg.type
     };
 
     if (newStatus) {
