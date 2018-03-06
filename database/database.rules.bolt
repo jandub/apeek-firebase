@@ -51,12 +51,16 @@ path /chats/{user_uid} {
 
 /*
  *  Messages
+ *  First path is necessary to read all messages in chat.
  */
-path /messages/{chat_uid}/{message_uid} is Message {
+path /messages/{chat_uid} {
     // User needs to be logged in and be in the chat
     read() {
         isLoggedIn() && isInChat(chat_uid)
     }
+}
+
+path /messages/{chat_uid}/{message_uid} is Message {
     // User needs to be logged in and his id should be 
     // equal to sender id
     // The type of message needs to match up to chat node status:

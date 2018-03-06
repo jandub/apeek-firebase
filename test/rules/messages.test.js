@@ -21,6 +21,27 @@ const getMessage = (type, senderId = 'user1', recipientId = 'user2') => {
 }
 
 
+describe('Messages rules - read all', () => {
+    before(() => {
+        const data = require.main.require(PATH_DATA + '/chat-pending.data.js');
+        targaryen.setFirebaseData(data);
+        targaryen.setFirebaseRules(rules);
+    });
+
+    it('Should not allow anonymous user to read all messages in chat', () => {
+        expect(null).cannot.read.path('/messages/chat_id');
+    });
+
+    it('Should allow authenticated user to read all messages if in the chat', () => {
+        expect({uid: 'user1'}).can.read.path('/messages/chat_id');
+        expect({uid: 'user2'}).can.read.path('/messages/chat_id');
+    });
+
+    it('Should not allow authenticated user to read all messages if not in chat', () => {
+        expect({uid: 'user3'}).cannot.read.path('/messages/chat_id');
+    });
+});
+
 describe('Messages rules - read', () => {
     before(() => {
         const data = require.main.require(PATH_DATA + '/chat-pending.data.js');
@@ -114,7 +135,6 @@ describe('Messages rules - create - request', () => {
         expect({uid: 'user1'}).cannot.write(msg).path('/messages/chat_id/msg_req2_id');
         expect({uid: 'user2'}).cannot.write(msg2).path('/messages/chat_id/msg_req2_id');
     });
-
 
     it('Should not allow user to create request if the chat is approved', () => {
         const msg = getMessage(consts.MSG_TYPE_REQUEST);
