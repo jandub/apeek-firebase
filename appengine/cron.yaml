@@ -1,0 +1,4 @@
+cron:
+- description: Push a "tick" onto pubsub every day at 9am
+  url: /publish/daily-tick
+  schedule: every day 09:00

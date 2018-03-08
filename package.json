@@ -5,10 +5,11 @@
     "scripts": {
         "shell": "node_modules/.bin/firebase experimental:functions:shell",
         "build": "node_modules/.bin/firebase-bolt database/database.rules.bolt --output database/database.rules.json",
-        "deploy": "node_modules/.bin/firebase deploy",
+        "deploy": "node_modules/.bin/firebase deploy && npm run deploy:cloud",
         "deploy:database": "node_modules/.bin/firebase deploy --only database",
         "deploy:functions": "node_modules/.bin/firebase deploy --only functions",
         "deploy:storage": "node_modules/.bin/firebase deploy --only storage",
+        "deploy:cloud": "gcloud app deploy appengine/app.yaml appengine/cron.yaml",
         "logs": "node_modules/.bin/firebase functions:log",
         "install": "cd functions && npm install && cd ..",
         "test": "node_modules/.bin/mocha \"test/rules/**/*.test.js\""
