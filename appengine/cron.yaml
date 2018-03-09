@@ -1,4 +1,5 @@
 cron:
 - description: Push a "tick" onto pubsub every day at 9am
   url: /publish/daily-tick
+  timezone: Europe/Prague
   schedule: every day 09:00
