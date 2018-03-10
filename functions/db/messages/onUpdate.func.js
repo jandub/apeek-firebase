@@ -41,7 +41,7 @@ const updateChats = event => {
     const db = admin.database();
     const chatId = event.params.chatId;
 
-    const chat = {status: consts.MSG_STATUS_READ};
+    const chat = {lastMsgStatus: consts.MSG_STATUS_READ};
 
     return db.ref(`chats/${msg.recipientId}/${chatId}`).update(chat)
         .then(() => {
