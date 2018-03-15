@@ -32,10 +32,10 @@ const consts = require('../../constants');
 module.exports = functions.database
     .ref('/messages/{chatId}/{messageId}')
     .onCreate(event => {
-        return markAsDelivered(event)
-            .then(() => {
-                return handleEvent(event)
-            });
+        return Promise.all([
+                markAsDelivered(event),
+                handleEvent(event)
+            ]);
     });
 
 const markAsDelivered = event => {
@@ -62,23 +62,18 @@ const handleRequest = event => {
     const msg = event.data.val();
     const chatId = event.params.chatId;
 
-    let senderSnap = null;
-    let recipientSnap = null;
+    return Promise.all([
+            db.ref(`/users/${msg.senderId}/profile`).once('value'),
+            db.ref(`/users/${msg.recipientId}/profile`).once('value')
+        ])
+        .then(([senderSnap, recipientSnap]) => {
+            const senderChat = getNewChatObject(senderSnap, msg);
+            const recipientChat = getNewChatObject(recipientSnap, msg);
 
-    return db.ref(`/users/${msg.senderId}/profile`).once('value')
-        .then(snapshot => {
-            senderSnap = snapshot;
-            return db.ref(`/users/${msg.recipientId}/profile`).once('value');
-        })
-        .then(snapshot => {
-            recipientSnap = snapshot;
-
-            const chatToSave = getNewChatObject(senderSnap, msg);
-            return db.ref(`/chats/${msg.recipientId}/${chatId}`).set(chatToSave);
-        })
-        .then(() => {
-            const chatToSave = getNewChatObject(recipientSnap, msg);
-            return db.ref(`/chats/${msg.senderId}/${chatId}`).set(chatToSave);
+            return Promise.all([
+                    db.ref(`/chats/${msg.recipientId}/${chatId}`).set(senderChat),
+                    db.ref(`/chats/${msg.senderId}/${chatId}`).set(recipientChat)
+                ]);
         });
 };
 
@@ -123,10 +118,10 @@ const updateChats = (event, newStatus = null) => {
 
     const chat = getUpdateChatObject(msg, newStatus); 
 
-    return db.ref(`/chats/${msg.senderId}/${chatId}`).update(chat)
-        .then(() => {
-            return db.ref(`/chats/${msg.recipientId}/${chatId}`).update(chat);
-        });
+    return Promise.all([
+            db.ref(`/chats/${msg.senderId}/${chatId}`).update(chat),
+            db.ref(`/chats/${msg.recipientId}/${chatId}`).update(chat)
+        ]);
 };
 
 const getUpdateChatObject = (msg, newStatus) => {
