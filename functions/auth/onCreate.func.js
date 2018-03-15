@@ -18,7 +18,6 @@ try {
 
 const consts = require('../constants');
 
-const storage = require('@google-cloud/storage')();
 const uuidv4 = require('uuid/v4');
 const axios = require('axios');
 
@@ -29,9 +28,7 @@ module.exports = functions.auth
         const user = event.data;
 
         return saveProfilePhoto(user)
-            .then(result => {
-                const photoLink = result[0].metadata.selfLink;
-
+            .then(photoLink => {
                 return createNewUser(user, photoLink);
             });
     });
@@ -72,16 +69,22 @@ const saveProfilePhoto = user => {
         .then(response => {
             const photoLink = response.data.data.url;
 
-            const bucket = functions.config().firebase.storageBucket;
+            const bucketName = functions.config().firebase.storageBucket;
+            const bucket = admin.storage().bucket(bucketName);
             const fileId = uuidv4();
             const options = {
                 destination: `${consts.STORAGE_PHOTOS}/${user.uid}/${fileId}.jpg`,
             };
 
-            return storage.bucket(bucket).upload(photoLink, options);
+            return bucket.upload(photoLink, options);
+        })
+        .then(result => {
+            const fileData = result[0].metadata;
+            return `gs://${fileData.bucket}/${fileData.name}`;
         })
         .catch(err => {
             // photo doesnt exist or not saved
+            console.log(err);
             return null;
         });
 };

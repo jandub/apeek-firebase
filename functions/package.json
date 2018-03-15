@@ -3,7 +3,6 @@
     "name": "apeek-firebase-functions",
     "description": "Apeek Firebase Functions",
     "dependencies": {
-        "@google-cloud/storage": "^1.6.0",
         "axios": "^0.18.0",
         "camelcase": "^4.1.0",
         "firebase-admin": "~5.8.2",
