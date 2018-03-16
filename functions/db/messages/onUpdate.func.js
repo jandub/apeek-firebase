@@ -2,8 +2,8 @@
  *  Triggers when a message is updated
  *  The only allowed update for messages is changing the 
  *  message status from "delivered" to "read"
- *  When that happens the function updates chat nodes and 
- *  sets lastMsgStatus to "read"
+ *  If the updated message is the last one, the function 
+ *  updates chat nodes and sets lastMsgStatus to "read"
  *
  *  The message status workflow:
  *  Client adds messages with status "sent"
@@ -40,11 +40,22 @@ const updateChats = event => {
 
     const db = admin.database();
     const chatId = event.params.chatId;
+    const msgId = event.params.messageId;
 
-    const chat = {lastMsgStatus: consts.MSG_STATUS_READ};
+    return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
+        .then(snapshot => {
+            const chat = snapshot.val();
 
-    return Promise.all([
-            db.ref(`chats/${msg.recipientId}/${chatId}`).update(chat),
-            db.ref(`chats/${msg.senderId}/${chatId}`).update(chat)
-        ]);
+            // updated message is not the last
+            if (chat.lastMsgId != msgId) {
+                return true;
+            }
+
+            const chatUpdate = {lastMsgStatus: consts.MSG_STATUS_READ};
+
+            return Promise.all([
+                    db.ref(`chats/${msg.recipientId}/${chatId}`).update(chatUpdate),
+                    db.ref(`chats/${msg.senderId}/${chatId}`).update(chatUpdate)
+                ]);
+        });
 };

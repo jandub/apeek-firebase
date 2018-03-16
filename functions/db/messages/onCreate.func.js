@@ -59,16 +59,17 @@ const handleEvent = event => {
 
 const handleRequest = event => {
     const db = admin.database();
-    const msg = event.data.val();
     const chatId = event.params.chatId;
+    const msgSnap = event.data;
+    const msg = msgSnap.val();
 
     return Promise.all([
             db.ref(`/users/${msg.senderId}/profile`).once('value'),
             db.ref(`/users/${msg.recipientId}/profile`).once('value')
         ])
         .then(([senderSnap, recipientSnap]) => {
-            const senderChat = getNewChatObject(senderSnap, msg);
-            const recipientChat = getNewChatObject(recipientSnap, msg);
+            const senderChat = getNewChatObject(senderSnap, msgSnap);
+            const recipientChat = getNewChatObject(recipientSnap, msgSnap);
 
             return Promise.all([
                     db.ref(`/chats/${msg.recipientId}/${chatId}`).set(senderChat),
@@ -77,9 +78,12 @@ const handleRequest = event => {
         });
 };
 
-const getNewChatObject = (userSnap, msg) => {
+const getNewChatObject = (userSnap, msgSnap) => {
     const user = userSnap.val();
     const userId = userSnap.ref.parent.key;
+    const msg = msgSnap.val();
+    const msgId = msgSnap.key;
+
     let photo = null;
 
     if (!!user.photos && !!user.photos[0]) {
@@ -91,6 +95,7 @@ const getNewChatObject = (userSnap, msg) => {
         recipientName: user.firstName,
         recipientUserPhoto: photo,
         status: consts.CHAT_STATUS_PENDING,
+        lastMsgId: msgId,
         lastMsgTs: msg.ts,
         lastMsgText: msg.text,
         lastMsgSenderId: msg.senderId,
@@ -114,9 +119,10 @@ const handleMessage = event => {
 const updateChats = (event, newStatus = null) => {
     const db = admin.database();
     const chatId = event.params.chatId;
+    const msgSnap = event.data;
     const msg = event.data.val();
 
-    const chat = getUpdateChatObject(msg, newStatus); 
+    const chat = getUpdateChatObject(msgSnap, newStatus); 
 
     return Promise.all([
             db.ref(`/chats/${msg.senderId}/${chatId}`).update(chat),
@@ -124,8 +130,12 @@ const updateChats = (event, newStatus = null) => {
         ]);
 };
 
-const getUpdateChatObject = (msg, newStatus) => {
+const getUpdateChatObject = (msgSnap, newStatus) => {
+    const msg = msgSnap.val();
+    const msgId = msgSnap.key;
+    
     const chat = {
+        lastMsgId: msgId,
         lastMsgTs: msg.ts,
         lastMsgText: msg.text,
         lastMsgSenderId: msg.senderId,
