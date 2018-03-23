@@ -5,21 +5,19 @@ const expect = chai.expect;
 const targaryen = require('targaryen/plugins/chai');
 chai.use(targaryen);
 
-// get file paths
-const {PATH_CONSTS, PATH_RULES, PATH_DATA} = require('./paths');
-
-// add firebase rules
-const rules = targaryen.json.loadSync(PATH_RULES);
-targaryen.setFirebaseRules(rules);
-
 // load constants
+const {PATH_CONSTS} = require('./paths');
 const consts = require.main.require(PATH_CONSTS);
 
+// add firebase rules
+const rules = targaryen.json.loadSync('database/database.rules.json');
+targaryen.setFirebaseRules(rules);
+
 // load testing data
-const usersNode = require.main.require(PATH_DATA + '/users');
-const chatsMsgsPendingNodes = require.main.require(PATH_DATA + '/chats-msgs-pending');
-const chatsMsgsApprovedNodes = require.main.require(PATH_DATA + '/chats-msgs-approved');
-const chatsMsgsDeniedNodes = require.main.require(PATH_DATA + '/chats-msgs-denied');
+const usersNode = require('./data/users');
+const chatsMsgsPendingNodes = require('./data/chats-msgs-pending');
+const chatsMsgsApprovedNodes = require('./data/chats-msgs-approved');
+const chatsMsgsDeniedNodes = require('./data/chats-msgs-denied');
 
 
 // helper function that returns valid message

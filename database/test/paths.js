@@ -10,7 +10,5 @@
  */
 
 module.exports = {
-    PATH_CONSTS: "functions/constants.js",
-    PATH_RULES: "database/database.rules.json",
-    PATH_DATA: "test/rules/data"
+    PATH_CONSTS: "functions/constants.js"
 };

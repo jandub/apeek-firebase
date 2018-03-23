@@ -5,18 +5,16 @@ const expect = chai.expect;
 const targaryen = require('targaryen/plugins/chai');
 chai.use(targaryen);
 
-// get file paths
-const {PATH_CONSTS, PATH_RULES, PATH_DATA} = require('./paths');
-
-// add firebase rules
-const rules = targaryen.json.loadSync(PATH_RULES);
-targaryen.setFirebaseRules(rules);
-
 // load constants
+const {PATH_CONSTS} = require('./paths');
 const consts = require.main.require(PATH_CONSTS);
 
+// add firebase rules
+const rules = targaryen.json.loadSync('database/database.rules.json');
+targaryen.setFirebaseRules(rules);
+
 // load testing data
-const usersNode = require.main.require(PATH_DATA + '/users');
+const usersNode = require('./data/users');
 
 
 // helper function that returns valid user profile

@@ -5,16 +5,13 @@ const expect = chai.expect;
 const targaryen = require('targaryen/plugins/chai');
 chai.use(targaryen);
 
-// get file paths
-const {PATH_CONSTS, PATH_RULES, PATH_DATA} = require('./paths');
-
 // add firebase rules
-const rules = targaryen.json.loadSync(PATH_RULES);
+const rules = targaryen.json.loadSync('database/database.rules.json');
 targaryen.setFirebaseRules(rules);
 
 // load testing data
-const usersNode = require.main.require(PATH_DATA + '/users');
-const chatsMsgsPendingNodes = require.main.require(PATH_DATA + '/chats-msgs-pending');
+const usersNode = require('./data/users');
+const chatsMsgsPendingNodes = require('./data/chats-msgs-pending');
 
 
 describe('Chats - rules', () => {
