@@ -18,7 +18,7 @@ try {
 
 const consts = require('../constants');
 
-const uuidv4 = require('uuid/v4');
+const uuid = require('uuid');
 const axios = require('axios');
 
 
@@ -71,7 +71,7 @@ const saveProfilePhoto = user => {
 
             const bucketName = functions.config().firebase.storageBucket;
             const bucket = admin.storage().bucket(bucketName);
-            const fileId = uuidv4();
+            const fileId = uuid.v4();
             const options = {
                 destination: `${consts.STORAGE_PHOTOS}/${user.uid}/${fileId}.jpg`,
             };
