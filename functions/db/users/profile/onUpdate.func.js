@@ -69,7 +69,7 @@ const getChanges = (newData, oldData) => {
         changes.recipientUserPhoto = newPhoto;
     }
 
-    return changes;
+    return Object.keys(changes).length != 0 ? changes : null;
 };
 
 const getUpdates = (changes, chats) => {
