@@ -14,10 +14,11 @@
         "install": "cd functions && npm install && cd ..",
         "test": "npm run test:rules && npm run test:functions",
         "test:rules": "node_modules/.bin/mocha \"database/test/**/*.test.js\"",
-        "test:functions": "node_modules/.bin/mocha \"functions/test/**/*.test.js\""
+        "test:functions": "node_modules/.bin/mocha --exit \"functions/test/**/*.test.js\""
     },
     "devDependencies": {
         "chai": "^4.1.2",
+        "chai-as-promised": "^7.1.1",
         "firebase-bolt": "^0.8.2",
         "firebase-tools": "^3.17.4",
         "mocha": "^5.0.1",
