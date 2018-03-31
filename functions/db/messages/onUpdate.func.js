@@ -54,8 +54,8 @@ const updateChats = event => {
             const chatUpdate = {lastMsgStatus: consts.MSG_STATUS_READ};
 
             return Promise.all([
-                    db.ref(`chats/${msg.recipientId}/${chatId}`).update(chatUpdate),
-                    db.ref(`chats/${msg.senderId}/${chatId}`).update(chatUpdate)
+                    db.ref(`/chats/${msg.recipientId}/${chatId}`).update(chatUpdate),
+                    db.ref(`/chats/${msg.senderId}/${chatId}`).update(chatUpdate)
                 ]);
         });
 };
