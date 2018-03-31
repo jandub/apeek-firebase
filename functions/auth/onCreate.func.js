@@ -67,24 +67,34 @@ const saveProfilePhoto = user => {
 
     return axios.get(fbLink)
         .then(response => {
-            const photoLink = response.data.data.url;
+            const url = response.data.data.url;
+            const isSilhouette = response.data.data.is_silhouette;
 
-            const bucketName = functions.config().firebase.storageBucket;
-            const bucket = admin.storage().bucket(bucketName);
-            const fileId = uuid.v4();
-            const options = {
-                destination: `${consts.STORAGE_PHOTOS}/${user.uid}/${fileId}.jpg`,
-            };
+            // facebook user has no profile photo
+            if (isSilhouette) {
+                return null;
+            }
 
-            return bucket.upload(photoLink, options);
+            return saveUrlToBucket(user.uid, url);
         })
+        .catch(err => {
+            // failed to get response from FB api or to save file to bucket
+            console.log(err);
+            return null;
+        });
+};
+
+const saveUrlToBucket = (userId, url) => {
+    const bucketName = functions.config().firebase.storageBucket;
+    const bucket = admin.storage().bucket(bucketName);
+    const fileId = uuid.v4();
+    const options = {
+        destination: `${consts.STORAGE_PHOTOS}/${userId}/${fileId}.jpg`,
+    };
+
+    return bucket.upload(url, options)
         .then(result => {
             const fileData = result[0].metadata;
             return `gs://${fileData.bucket}/${fileData.name}`;
-        })
-        .catch(err => {
-            // photo doesnt exist or not saved
-            console.log(err);
-            return null;
         });
 };

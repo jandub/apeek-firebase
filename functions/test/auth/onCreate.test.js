@@ -46,7 +46,7 @@ describe('authOnCreate function', () => {
         storageStub.get(() => (() => ({bucket: bucketStub})));
 
         // stub admin.database().ref().set() call
-        setStub = sandbox.stub();
+        setStub = sandbox.stub().returns(Promise.resolve());
         const refStub = sandbox.stub().returns({set: setStub});
         const databaseStub = sandbox.stub(admin, 'database');
         databaseStub.get(() => (() => ({ref: refStub})));
@@ -78,9 +78,6 @@ describe('authOnCreate function', () => {
             }
         }];
         uploadStub.returns(Promise.resolve(uploadResult));
-
-        // set return value for database set call
-        setStub.returns(Promise.resolve());
         
         // create fake auth event
         const fakeEvent = {
@@ -106,7 +103,7 @@ describe('authOnCreate function', () => {
                 expect(uploadStub).to.be.calledWith(...expectedUploadArgs);
 
                 // check the saved user object
-                const expectedUpdateArgs = {
+                const expectedUpdateArg = {
                     profile: {
                         firstName: 'Firstname',
                         lastName: 'Lastname',
@@ -119,16 +116,23 @@ describe('authOnCreate function', () => {
                         email: 'test@email.com',
                     },
                 };
-                expect(setStub).to.be.calledWith(expectedUpdateArgs);
+                expect(setStub).to.be.calledWith(expectedUpdateArg);
             });
     });
 
-    it('Should create a user profile when the call to Facebook api fails', () => {
-        // axios.get call fails
-        axiosGetStub.returns(Promise.reject());
-
-        // set return value for database set call
-        setStub.returns(Promise.resolve());
+    it('Should create a user profile without a photo when user uses default FB profile photo', () => {
+        // set response for axios.get call to facebook api
+        const fbResponse = {
+            data: {
+                data: {
+                    height: 1052,
+                    is_silhouette: true,
+                    url: 'test_url',
+                    width: 1052
+                }
+            }
+        };
+        axiosGetStub.returns(Promise.resolve(fbResponse));
         
         // create fake auth event
         const fakeEvent = {
@@ -146,8 +150,11 @@ describe('authOnCreate function', () => {
 
         return myFunctions.authOnCreate(fakeEvent)
             .then(() => {
+                // bucket.upload not called
+                expect(uploadStub).not.to.be.called;
+
                 // check the saved user object
-                const expectedUpdateArgs = {
+                const expectedUpdateArg = {
                     profile: {
                         firstName: 'Firstname',
                         lastName: 'Lastname',
@@ -160,7 +167,48 @@ describe('authOnCreate function', () => {
                         email: 'test@email.com',
                     },
                 };
-                expect(setStub).to.be.calledWith(expectedUpdateArgs);
+                expect(setStub).to.be.calledWith(expectedUpdateArg);
+            });
+    });
+
+    it('Should create a user profile when the call to Facebook api fails', () => {
+        // axios.get call fails
+        axiosGetStub.returns(Promise.reject());
+        
+        // create fake auth event
+        const fakeEvent = {
+            data: {
+                uid: 'test-uid',
+                displayName: 'Firstname Lastname',
+                email: 'test@email.com',
+                gender: 'male',
+                providerData: [{
+                    providerId: 'facebook.com',
+                    uid: 'fb-test-uid'
+                }]
+            },
+        };
+
+        return myFunctions.authOnCreate(fakeEvent)
+            .then(() => {
+                // bucket.upload not called
+                expect(uploadStub).not.to.be.called;
+
+                // check the saved user object
+                const expectedUpdateArg = {
+                    profile: {
+                        firstName: 'Firstname',
+                        lastName: 'Lastname',
+                        gender: 'male',
+                        about: '',
+                        interests: '',
+                        photos: [null]
+                    },
+                    meta: {
+                        email: 'test@email.com',
+                    },
+                };
+                expect(setStub).to.be.calledWith(expectedUpdateArg);
             });
     });
 
@@ -180,9 +228,6 @@ describe('authOnCreate function', () => {
         
         // bucket upload fails
         uploadStub.returns(Promise.reject());
-
-        // set return value for database set call
-        setStub.returns(Promise.resolve());
         
         // create fake auth event
         const fakeEvent = {
@@ -201,7 +246,7 @@ describe('authOnCreate function', () => {
         return myFunctions.authOnCreate(fakeEvent)
             .then(() => {
                 // check the saved user object
-                const expectedUpdateArgs = {
+                const expectedUpdateArg = {
                     profile: {
                         firstName: 'Firstname',
                         lastName: 'Lastname',
@@ -214,7 +259,7 @@ describe('authOnCreate function', () => {
                         email: 'test@email.com',
                     },
                 };
-                expect(setStub).to.be.calledWith(expectedUpdateArgs);
+                expect(setStub).to.be.calledWith(expectedUpdateArg);
             });
     });
 });
