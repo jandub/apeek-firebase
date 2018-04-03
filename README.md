@@ -10,7 +10,7 @@
 ```
 $ git clone https://github.com/jandub/apeek-firebase.git
 ```
-and change directory to the ```apeek-firebase``` directory.
+    and change directory to the ```apeek-firebase``` directory.
 ```
 $ cd apeek-firebase
 ```
@@ -29,11 +29,11 @@ npm run login
 ```
 $ gcloud config set project apeek-ca78d
 ```
-change directory to ```appengine```
+    change directory to ```appengine```
 ```
 $ cd appengine
 ```
-and create an App Engine App
+    and create an App Engine App
 ```
 $ gcloud app create
 ```
@@ -43,7 +43,7 @@ Deploy everything to Firebase and Google Cloud
 ```
 $ npm run deploy
 ```
-or deploy just a single part:
+or deploy just a single part of the project:
 * Firebase functions  
 ```$ npm run deploy:functions```
 * Firebase database rules  
@@ -58,7 +58,7 @@ Run the tests using
 ```
 $ npm test
 ```
-or run just the test for a part of the project
+or run just the tests for a part of the project
 * Database rules tests  
 ```$ npm run test:rules```
 * Firebase functions unit tests  
@@ -68,13 +68,13 @@ or run just the test for a part of the project
 
 ### Database rules
 Rules are written using [Bolt](https://github.com/firebase/bolt) - more information about this language can be found in [language docs](https://github.com/firebase/bolt/blob/master/docs/language.md) and in the [guide](https://github.com/firebase/bolt/blob/master/docs/guide.md).  
-Rules needs to be converted to json before deployment
+Translate the Bolt rules to json using
 ```
 $ npm build
 ```
 
 ### Firebase functions
-Functions can be testing locally using experimental shell
+Functions can be tested locally using experimental shell
 ```
 $ npm run shell
 ```
