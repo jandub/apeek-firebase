@@ -10,7 +10,7 @@
 ```
 $ git clone https://github.com/jandub/apeek-firebase.git
 ```
-    and change directory to the ```apeek-firebase``` directory.
+and change directory to the ```apeek-firebase``` directory.
 ```
 $ cd apeek-firebase
 ```
@@ -29,11 +29,11 @@ npm run login
 ```
 $ gcloud config set project apeek-ca78d
 ```
-    change directory to ```appengine```
+change directory to ```appengine```
 ```
 $ cd appengine
 ```
-    and create an App Engine App
+and create an App Engine App
 ```
 $ gcloud app create
 ```
