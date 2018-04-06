@@ -70,7 +70,7 @@ or run just the tests for a part of the project
 Rules are written using [Bolt](https://github.com/firebase/bolt) - more information about this language can be found in [language docs](https://github.com/firebase/bolt/blob/master/docs/language.md) and in the [guide](https://github.com/firebase/bolt/blob/master/docs/guide.md).  
 Translate the Bolt rules to json using
 ```
-$ npm build
+$ npm run build
 ```
 
 ### Firebase functions
