@@ -254,9 +254,10 @@ type PhotoKey extends String {
 }
 
 type StorageLink extends String {
-    //validate() {
-    //    // TODO
-    //}
+    validate() {
+        this.beginsWith("gs://apeek-ca78d.appspot.com/user_photos/") &&
+        this.contains(auth.uid)
+    }
 }
 
 type UserLocation extends Object {

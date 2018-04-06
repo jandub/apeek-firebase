@@ -26,7 +26,7 @@ const getProfile = () => {
         gender: consts.GENDER_MALE,
         interests: 'Some interests 1...',
         about: 'Something about user1...',
-        photos: ['photolink']
+        photos: ['gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg']
     };
 }
 
@@ -217,12 +217,20 @@ describe('Users - rules', () => {
         it('Should validate photos', () => {
             const profile = getProfile();
 
-            profile.photos = ['1', '2', '3', '4', '5', '6', '7'];
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
-
-            profile.photos = {'6': 'test'};
+            profile.photos = [
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/2.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/3.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/4.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/5.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/6.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/7.jpg'
+            ];
             expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
             
+            profile.photos = 1234;
+            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+
             profile.photos = 'Some string';
             expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
 
@@ -231,6 +239,18 @@ describe('Users - rules', () => {
 
             profile.photos = [];
             expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
+
+            // wrong user uid (folder) in link
+            profile.photos = ['gs://apeek-ca78d.appspot.com/user_photos/user2/1.jpg'];
+            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+
+            // not the right bucket
+            profile.photos = ['gs://apeek-abcde.appspot.com/user_photos/user1/1.jpg'];
+            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+
+            // allows only gs:// links
+            profile.photos = ['http://apeek-ca78d.appspot.com/user_photos/user1/1.jpg'];
+            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
         });
     });
 });
