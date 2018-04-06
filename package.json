@@ -11,7 +11,8 @@
         "deploy:storage": "node_modules/.bin/firebase deploy --only storage",
         "deploy:cloud": "gcloud app deploy appengine/app.yaml appengine/cron.yaml",
         "logs": "node_modules/.bin/firebase functions:log",
-        "install": "cd functions && npm install && cd ..",
+        "login": "node_modules/.bin/firebase login",
+        "install": "cd functions && npm install && cd .. && cd appengine && pip install -t lib -r requirements.txt && cd..",
         "test": "npm run test:rules && npm run test:functions",
         "test:rules": "node_modules/.bin/mocha \"database/test/**/*.test.js\"",
         "test:functions": "node_modules/.bin/mocha --exit \"functions/test/**/*.test.js\""
@@ -26,5 +27,8 @@
         "sinon-chai": "^3.0.0",
         "targaryen": "^3.0.5"
     },
-    "private": true
+    "private": true,
+    "dependencies": {
+        "npm": "^5.8.0"
+    }
 }
