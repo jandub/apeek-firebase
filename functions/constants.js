@@ -19,5 +19,6 @@ module.exports = {
     "GENDER_MALE": "male",
     "GENDER_FEMALE": "female",
 
-    "STORAGE_PHOTOS": "user_photos"
+    "STORAGE_PHOTOS": "user_photos",
+    "USER_PHOTOS_MAX": 6
 };
