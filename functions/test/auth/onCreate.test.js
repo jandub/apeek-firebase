@@ -40,7 +40,7 @@ describe('authOnCreate function', () => {
         sandbox.stub(uuid, 'v4').returns('some-uuid');
 
         // stub admin.storage().bucket().upload() call
-        uploadStub = sandbox.stub();
+        uploadStub = sandbox.stub().returns(Promise.resolve());
         const bucketStub = sandbox.stub().returns({upload: uploadStub});
         const storageStub = sandbox.stub(admin, 'storage');
         storageStub.get(() => (() => ({bucket: bucketStub})));
@@ -69,15 +69,6 @@ describe('authOnCreate function', () => {
             }
         };
         axiosGetStub.returns(Promise.resolve(fbResponse));
-        
-        // set return value for bucket upload call
-        const uploadResult = [{
-            metadata: {
-                name: 'some-file-path',
-                bucket: 'some-bucket'
-            }
-        }];
-        uploadStub.returns(Promise.resolve(uploadResult));
         
         // create fake auth event
         const fakeEvent = {
@@ -109,8 +100,7 @@ describe('authOnCreate function', () => {
                         lastName: 'Lastname',
                         gender: 'male',
                         about: '',
-                        interests: '',
-                        photos: ['gs://some-bucket/some-file-path']
+                        interests: ''
                     },
                     meta: {
                         email: 'test@email.com',
@@ -160,8 +150,7 @@ describe('authOnCreate function', () => {
                         lastName: 'Lastname',
                         gender: 'male',
                         about: '',
-                        interests: '',
-                        photos: [null]
+                        interests: ''
                     },
                     meta: {
                         email: 'test@email.com',
@@ -201,8 +190,7 @@ describe('authOnCreate function', () => {
                         lastName: 'Lastname',
                         gender: 'male',
                         about: '',
-                        interests: '',
-                        photos: [null]
+                        interests: ''
                     },
                     meta: {
                         email: 'test@email.com',
@@ -252,8 +240,7 @@ describe('authOnCreate function', () => {
                         lastName: 'Lastname',
                         gender: 'male',
                         about: '',
-                        interests: '',
-                        photos: [null]
+                        interests: ''
                     },
                     meta: {
                         email: 'test@email.com',

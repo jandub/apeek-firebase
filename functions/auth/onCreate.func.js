@@ -27,13 +27,13 @@ module.exports = functions.auth
     .onCreate(event => {
         const user = event.data;
 
-        return saveProfilePhoto(user)
-            .then(photoLink => {
-                return createNewUser(user, photoLink);
+        return createNewUser(user)
+            .then(() => {
+                return saveProfilePhoto(user);
             });
     });
 
-const createNewUser = (user, photoLink) => {
+const createNewUser = user => {
     const db = admin.database();
 
     const displayName = user.displayName.split(' ');
@@ -46,8 +46,7 @@ const createNewUser = (user, photoLink) => {
             lastName,
             gender: user.gender || null,
             about: '',
-            interests: '',
-            photos: [photoLink]
+            interests: ''
         },
         meta: {
             email: user.email,
@@ -80,7 +79,6 @@ const saveProfilePhoto = user => {
         .catch(err => {
             // failed to get response from FB api or to save file to bucket
             console.log(err);
-            return null;
         });
 };
 
@@ -92,9 +90,5 @@ const saveUrlToBucket = (userId, url) => {
         destination: `${consts.STORAGE_PHOTOS}/${userId}/${fileId}.jpg`,
     };
 
-    return bucket.upload(url, options)
-        .then(result => {
-            const fileData = result[0].metadata;
-            return `gs://${fileData.bucket}/${fileData.name}`;
-        });
+    return bucket.upload(url, options);
 };
