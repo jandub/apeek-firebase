@@ -12,7 +12,7 @@ const functions = require('firebase-functions');
 // admin SDK can be only initialized once, wrap in try-catch
 const admin = require('firebase-admin');
 try {
-    admin.initializeApp(functions.config().firebase);
+    admin.initializeApp();
 } catch(e) {}
 
 
@@ -24,9 +24,7 @@ const axios = require('axios');
 
 module.exports = functions.auth
     .user()
-    .onCreate(event => {
-        const user = event.data;
-
+    .onCreate((user, context) => {
         return createNewUser(user)
             .then(() => {
                 return saveProfilePhoto(user);
@@ -83,7 +81,8 @@ const saveProfilePhoto = user => {
 };
 
 const saveUrlToBucket = (userId, url) => {
-    const bucketName = functions.config().firebase.storageBucket;
+    const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+    const bucketName = firebaseConfig.storageBucket;
     const bucket = admin.storage().bucket(bucketName);
     const fileId = uuid.v4();
     const options = {
