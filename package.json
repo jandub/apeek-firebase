@@ -27,8 +27,5 @@
         "sinon-chai": "^3.0.0",
         "targaryen": "^3.0.5"
     },
-    "private": true,
-    "dependencies": {
-        "npm": "^5.8.0"
-    }
+    "private": true
 }
