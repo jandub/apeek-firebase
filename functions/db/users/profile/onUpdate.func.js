@@ -13,43 +13,39 @@ const functions = require('firebase-functions');
 // admin SDK can be only initialized once, wrap in try-catch
 const admin = require('firebase-admin');
 try {
-    admin.initializeApp(functions.config().firebase);
+    admin.initializeApp();
 } catch (e) {}
 
 
 module.exports = functions.database
     .ref('/users/{userId}/profile')
-    .onUpdate(event => {
-        return updateChats(event);
+    .onUpdate((change, context) => {
+        const newData = change.after.val();
+        const oldData = change.before.val();
+
+        const changes = getChanges(newData, oldData);
+
+        if (!changes) {
+            // nothing to update - user has still the same 
+            // firstName and profile photo
+            return true;
+        }
+
+        const db = admin.database();
+        const userId = context.params.userId;
+
+        return db.ref(`/chats/${userId}`).once('value')
+            .then(snap => {
+                const chats = snap.val();
+                
+                if (!chats) {
+                    return true;
+                }
+
+                const updates = getUpdates(changes, chats);
+                return db.ref().update(updates);
+            });
     });
-
-const updateChats = event => {
-    const newData = event.data.val();
-    const oldData = event.data.previous.val();
-
-    const changes = getChanges(newData, oldData);
-
-    if (!changes) {
-        // nothing to update - user has still the same 
-        // firstName and profile photo
-        return true;
-    }
-
-    const db = admin.database();
-    const userId = event.params.userId;
-
-    return db.ref(`/chats/${userId}`).once('value')
-        .then(snap => {
-            const chats = snap.val();
-            
-            if (!chats) {
-                return true;
-            }
-
-            const updates = getUpdates(changes, chats);
-            return db.ref().update(updates);
-        });
-};
 
 const getChanges = (newData, oldData) => {
     const changes = {};
