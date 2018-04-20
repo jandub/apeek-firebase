@@ -49,7 +49,8 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
 });
 
 const deleteFile = path => {
-    const bucketName = functions.config().firebase.storageBucket;
+    const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+    const bucketName = firebaseConfig.storageBucket;
     const bucket = admin.storage().bucket(bucketName);
 
     return bucket.file(path).delete();
