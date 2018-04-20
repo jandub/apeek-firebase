@@ -9,24 +9,18 @@ chai.use(sinonChai);
 const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
+// initialize firebase sdk
+const test = require('firebase-functions-test')();
+
 
 describe('dbMessagesOnUpdate function', () => {
-    let admin, functions, myFunctions, onceStub, updateStub, adminAppStub;
+    let admin, myFunctions, onceStub, updateStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
         admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // stub functions config
-        functions = require('firebase-functions');
-        sandbox.stub(functions, 'config').returns({
-            firebase: {
-                databaseURL: 'https://not-a-project.firebaseio.com',
-                storageBucket: 'not-a-project.appspot.com',
-            }
-        });
 
         // get cloud functions
         myFunctions = require('../../../index');
@@ -41,18 +35,11 @@ describe('dbMessagesOnUpdate function', () => {
         });
         const databaseStub = sandbox.stub(admin, 'database');
         databaseStub.get(() => (() => ({ref: refStub})));
-
-        adminUpdateStub = sandbox.stub().returns(Promise.resolve());
-        const adminRefStub = sandbox.stub().returns({
-            update: adminUpdateStub
-        });
-        adminAppStub = {
-            database() { return {ref: adminRefStub}; }
-        };
     });
 
     afterEach(() =>  {
         sandbox.restore();
+        test.cleanup();
     });
 
     it('Should create chat nodes when request is sent', () => {
@@ -76,27 +63,34 @@ describe('dbMessagesOnUpdate function', () => {
         onceStub.onFirstCall().returns(Promise.resolve(senderResult));
         onceStub.onSecondCall().returns(Promise.resolve(recipientResult));
         
-        // create fake database update event
-        const message = {
-            senderId: 'sender-id',
-            recipientId: 'recipient-id',
-            text: 'Text',
-            ts: 1234567890,
-            type: 'request',
-            status: 'sent'
+        // create snapshot and context
+        const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
+        const msgSnap = {
+            ref: {update: msgUpdateStub},
+            key: 'msg-id',
+            val() { return {
+                    senderId: 'sender-id',
+                    recipientId: 'recipient-id',
+                    text: 'Text',
+                    ts: 1234567890,
+                    type: 'request',
+                    status: 'sent'
+                };
+            }
         };
-        const fakeEvent = {
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, adminAppStub, null, message, '/messages/chat-id/msg-id'),
+            }
         };
 
-        return myFunctions.dbMessagesOnCreate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbMessagesOnCreate);
+
+        return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(adminUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
 
                 // check the update arguments
                 const senderChat = {
@@ -125,27 +119,34 @@ describe('dbMessagesOnUpdate function', () => {
     });
 
     it('Should update chat nodes when approval is sent', () => {
-        // create fake database update event
-        const message = {
-            senderId: 'sender-id',
-            recipientId: 'recipient-id',
-            text: 'Text',
-            ts: 1234567890,
-            type: 'approved',
-            status: 'sent'
+        // create snapshot and context
+        const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
+        const msgSnap = {
+            ref: {update: msgUpdateStub},
+            key: 'msg-id',
+            val() { return {
+                    senderId: 'sender-id',
+                    recipientId: 'recipient-id',
+                    text: 'Text',
+                    ts: 1234567890,
+                    type: 'approved',
+                    status: 'sent'
+                };
+            }
         };
-        const fakeEvent = {
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, adminAppStub, null, message, '/messages/chat-id/msg-id'),
+            }
         };
 
-        return myFunctions.dbMessagesOnCreate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbMessagesOnCreate);
+
+        return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(adminUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
 
                 // check the update arguments
                 const expectedUpdateArg = {
@@ -169,27 +170,34 @@ describe('dbMessagesOnUpdate function', () => {
     });
 
     it('Should update chat nodes when denial is sent', () => {
-        // create fake database update event
-        const message = {
-            senderId: 'sender-id',
-            recipientId: 'recipient-id',
-            text: 'Text',
-            ts: 1234567890,
-            type: 'denied',
-            status: 'sent'
+        // create snapshot and context
+        const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
+        const msgSnap = {
+            ref: {update: msgUpdateStub},
+            key: 'msg-id',
+            val() { return {
+                    senderId: 'sender-id',
+                    recipientId: 'recipient-id',
+                    text: 'Text',
+                    ts: 1234567890,
+                    type: 'denied',
+                    status: 'sent'
+                };
+            }
         };
-        const fakeEvent = {
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, adminAppStub, null, message, '/messages/chat-id/msg-id'),
+            }
         };
 
-        return myFunctions.dbMessagesOnCreate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbMessagesOnCreate);
+
+        return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(adminUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
 
                 // check the update arguments
                 const expectedUpdateArg = {
@@ -213,27 +221,34 @@ describe('dbMessagesOnUpdate function', () => {
     });
 
     it('Should update chat nodes when message is sent', () => {
-        // create fake database update event
-        const message = {
-            senderId: 'sender-id',
-            recipientId: 'recipient-id',
-            text: 'Text',
-            ts: 1234567890,
-            type: 'message',
-            status: 'sent'
+        // create snapshot and context
+        const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
+        const msgSnap = {
+            ref: {update: msgUpdateStub},
+            key: 'msg-id',
+            val() { return {
+                    senderId: 'sender-id',
+                    recipientId: 'recipient-id',
+                    text: 'Text',
+                    ts: 1234567890,
+                    type: 'message',
+                    status: 'sent'
+                };
+            }
         };
-        const fakeEvent = {
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, adminAppStub, null, message, '/messages/chat-id/msg-id'),
+            }
         };
 
-        return myFunctions.dbMessagesOnCreate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbMessagesOnCreate);
+
+        return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(adminUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
 
                 // check the update arguments
                 const expectedUpdateArg = {

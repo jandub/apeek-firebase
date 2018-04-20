@@ -9,24 +9,18 @@ chai.use(sinonChai);
 const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
+// initialize firebase sdk
+const test = require('firebase-functions-test')();
 
-describe('storageOnChange function', () => {
-    let admin, functions, myFunctions, onceStub, setStub, fileStub, deleteStub;
+
+describe('storageOnFinalize function', () => {
+    let admin, myFunctions, onceStub, setStub, fileStub, deleteStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
         admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // stub functions config
-        functions = require('firebase-functions');
-        sandbox.stub(functions, 'config').returns({
-            firebase: {
-                databaseURL: 'https://not-a-project.firebaseio.com',
-                storageBucket: 'not-a-project.appspot.com',
-            }
-        });
 
         // get cloud functions
         myFunctions = require('../../index');
@@ -52,6 +46,7 @@ describe('storageOnChange function', () => {
 
     afterEach(() =>  {
         sandbox.restore();
+        test.cleanup();
     });
 
     it('Should add uploaded file link to users profile photos array', () => {
@@ -71,7 +66,7 @@ describe('storageOnChange function', () => {
             },
         };
 
-        return myFunctions.storageOnChange(fakeEvent)
+        return myFunctions.storageOnFinalize(fakeEvent)
             .then(() => {
                 // check if delete was not called
                 expect(deleteStub).not.to.be.called;
@@ -103,7 +98,7 @@ describe('storageOnChange function', () => {
             },
         };
 
-        return myFunctions.storageOnChange(fakeEvent)
+        return myFunctions.storageOnFinalize(fakeEvent)
             .then(() => {
                 // check if delete was not called
                 expect(deleteStub).not.to.be.called;
@@ -135,7 +130,7 @@ describe('storageOnChange function', () => {
             },
         };
 
-        return myFunctions.storageOnChange(fakeEvent)
+        return myFunctions.storageOnFinalize(fakeEvent)
             .then(() => {
                 // check if delete was not called
                 expect(deleteStub).not.to.be.called;
@@ -165,7 +160,7 @@ describe('storageOnChange function', () => {
             },
         };
 
-        return myFunctions.storageOnChange(fakeEvent)
+        return myFunctions.storageOnFinalize(fakeEvent)
             .then(() => {
                 // check if delete was not called
                 expect(deleteStub).not.to.be.called;
@@ -195,7 +190,7 @@ describe('storageOnChange function', () => {
             },
         };
 
-        return myFunctions.storageOnChange(fakeEvent)
+        return myFunctions.storageOnFinalize(fakeEvent)
             .then(() => {
                 // should not update users photos
                 expect(setStub).not.to.be.called;

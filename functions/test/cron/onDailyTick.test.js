@@ -9,28 +9,24 @@ chai.use(sinonChai);
 const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
+// initialize firebase sdk
+const test = require('firebase-functions-test')();
+
 
 describe('cronOnDailyTick function', () => {
-    let admin, functions, myFunctions;
+    let admin, myFunctions;
 
     // setup - stub admin.initializeApp and functions config
     beforeEach(() => {
         admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
 
-        functions = require('firebase-functions');
-        sandbox.stub(functions, 'config').returns({
-            firebase: {
-                databaseURL: 'https://not-a-project.firebaseio.com',
-                storageBucket: 'not-a-project.appspot.com',
-            }
-        });
-
         myFunctions = require('../../index');
     });
 
     afterEach(() =>  {
         sandbox.restore();
+        test.cleanup();
     });
 
     it('Should delete chats and messages nodes', () => {
@@ -41,11 +37,9 @@ describe('cronOnDailyTick function', () => {
         databaseStub.get(() => (() => ({ref: refStub})));
         
         // create fake pub/sub message event and call the function
-        const fakeEvent = {
-            data: new functions.pubsub.Message({data: null}),
-        };
+        const fakeMsg = test.pubsub.exampleMessage();
 
-        return myFunctions.cronOnDailyTick(fakeEvent)
+        return myFunctions.cronOnDailyTick(fakeMsg)
             .then(() => {
                 // check if update function was called with correct args
                 const expectedParams = {
