@@ -10,15 +10,14 @@ const functions = require('firebase-functions');
 // admin SDK can be only initialized once, wrap in try-catch
 const admin = require('firebase-admin');
 try {
-    admin.initializeApp(functions.config().firebase);
+    admin.initializeApp();
 } catch(e) {}
 
 
 const consts = require('../constants');
 
 
-module.exports = functions.storage.object().onChange(event => {
-    const object = event.data;
+module.exports = functions.storage.object().onFinalize((object, context) => {
     const filePath = object.name;
 
     // validate path - expects user_photos/${user_uid}/${filename}
@@ -50,7 +49,8 @@ module.exports = functions.storage.object().onChange(event => {
 });
 
 const deleteFile = path => {
-    const bucketName = functions.config().firebase.storageBucket;
+    const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+    const bucketName = firebaseConfig.storageBucket;
     const bucket = admin.storage().bucket(bucketName);
 
     return bucket.file(path).delete();

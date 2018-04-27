@@ -23,7 +23,7 @@ const functions = require('firebase-functions');
 // admin SDK can be only initialized once, wrap in try-catch
 const admin = require('firebase-admin');
 try {
-    admin.initializeApp(functions.config().firebase);
+    admin.initializeApp();
 } catch (e) {}
 
 const consts = require('../../constants');
@@ -31,36 +31,35 @@ const consts = require('../../constants');
 
 module.exports = functions.database
     .ref('/messages/{chatId}/{messageId}')
-    .onCreate(event => {
+    .onCreate((msgSnap, context) => {
         return Promise.all([
-                markAsDelivered(event),
-                handleEvent(event)
+                markAsDelivered(msgSnap),
+                handleEvent(msgSnap, context)
             ]);
     });
 
-const markAsDelivered = event => {
-    return event.data.adminRef.update({status: consts.MSG_STATUS_DELIVERED});
+const markAsDelivered = msgSnap => {
+    return msgSnap.ref.update({status: consts.MSG_STATUS_DELIVERED});
 };
 
-const handleEvent = event => {
-    const msg = event.data.val();
+const handleEvent = (msgSnap, context) => {
+    const msg = msgSnap.val();
 
     switch (msg.type) {
         case consts.MSG_TYPE_REQUEST:
-            return handleRequest(event);
+            return handleRequest(msgSnap, context);
         case consts.MSG_TYPE_APPROVED:
-            return handleApproved(event);
+            return handleApproved(msgSnap, context);
         case consts.MSG_TYPE_DENIED:
-            return handleDenied(event);
+            return handleDenied(msgSnap, context);
         case consts.MSG_TYPE_MESSAGE:
-            return handleMessage(event);
+            return handleMessage(msgSnap, context);
     }
 };
 
-const handleRequest = event => {
+const handleRequest = (msgSnap, context) => {
     const db = admin.database();
-    const chatId = event.params.chatId;
-    const msgSnap = event.data;
+    const chatId = context.params.chatId;
     const msg = msgSnap.val();
 
     return Promise.all([
@@ -105,22 +104,21 @@ const getNewChatObject = (userSnap, msgSnap) => {
     };
 };
 
-const handleApproved = event => {
-    return updateChats(event, consts.CHAT_STATUS_APPROVED);
+const handleApproved = (msgSnap, context) => {
+    return updateChats(msgSnap, context, consts.CHAT_STATUS_APPROVED);
 };
 
-const handleDenied = event => {
-    return updateChats(event, consts.CHAT_STATUS_DENIED);
+const handleDenied = (msgSnap, context) => {
+    return updateChats(msgSnap, context, consts.CHAT_STATUS_DENIED);
 };
 
-const handleMessage = event => {
-    return updateChats(event);
+const handleMessage = (msgSnap, context) => {
+    return updateChats(msgSnap, context);
 };
 
-const updateChats = (event, newStatus = null) => {
+const updateChats = (msgSnap, context, newStatus = null) => {
     const db = admin.database();
-    const chatId = event.params.chatId;
-    const msgSnap = event.data;
+    const chatId = context.params.chatId;
 
     const updates = getChatUpdates(chatId, msgSnap, newStatus); 
 

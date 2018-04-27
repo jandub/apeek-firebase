@@ -9,24 +9,18 @@ chai.use(sinonChai);
 const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
+// initialize firebase sdk
+const test = require('firebase-functions-test')();
+
 
 describe('authOnCreate function', () => {
-    let admin, functions, myFunctions, axiosGetStub, uploadStub, setStub;
+    let admin, myFunctions, axiosGetStub, uploadStub, setStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
         admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // stub functions config
-        functions = require('firebase-functions');
-        sandbox.stub(functions, 'config').returns({
-            firebase: {
-                databaseURL: 'https://not-a-project.firebaseio.com',
-                storageBucket: 'not-a-project.appspot.com',
-            }
-        });
 
         // get cloud functions
         myFunctions = require('../../index');
@@ -54,6 +48,7 @@ describe('authOnCreate function', () => {
 
     afterEach(() =>  {
         sandbox.restore();
+        test.cleanup();
     });
 
     it('Should create a user profile and upload a photo from Facebook', () => {
@@ -86,13 +81,6 @@ describe('authOnCreate function', () => {
 
         return myFunctions.authOnCreate(fakeEvent)
             .then(() => {
-                // check if the file got uploaded
-                const expectedUploadArgs = [
-                    'test_url',
-                    {destination: `user_photos/test-uid/some-uuid.jpg`}
-                ];
-                expect(uploadStub).to.be.calledWith(...expectedUploadArgs);
-
                 // check the saved user object
                 const expectedUpdateArg = {
                     profile: {
@@ -107,6 +95,13 @@ describe('authOnCreate function', () => {
                     },
                 };
                 expect(setStub).to.be.calledWith(expectedUpdateArg);
+
+                // check if the file got uploaded
+                const expectedUploadArgs = [
+                    'test_url',
+                    {destination: `user_photos/test-uid/some-uuid.jpg`}
+                ];
+                expect(uploadStub).to.be.calledWith(...expectedUploadArgs);
             });
     });
 
@@ -140,9 +135,6 @@ describe('authOnCreate function', () => {
 
         return myFunctions.authOnCreate(fakeEvent)
             .then(() => {
-                // bucket.upload not called
-                expect(uploadStub).not.to.be.called;
-
                 // check the saved user object
                 const expectedUpdateArg = {
                     profile: {
@@ -157,6 +149,9 @@ describe('authOnCreate function', () => {
                     },
                 };
                 expect(setStub).to.be.calledWith(expectedUpdateArg);
+
+                // bucket.upload not called
+                expect(uploadStub).not.to.be.called;
             });
     });
 
@@ -180,9 +175,6 @@ describe('authOnCreate function', () => {
 
         return myFunctions.authOnCreate(fakeEvent)
             .then(() => {
-                // bucket.upload not called
-                expect(uploadStub).not.to.be.called;
-
                 // check the saved user object
                 const expectedUpdateArg = {
                     profile: {
@@ -197,6 +189,9 @@ describe('authOnCreate function', () => {
                     },
                 };
                 expect(setStub).to.be.calledWith(expectedUpdateArg);
+
+                // bucket.upload not called
+                expect(uploadStub).not.to.be.called;
             });
     });
 

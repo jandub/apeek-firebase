@@ -13,6 +13,9 @@ chai.use(chaiAsPromised);
 const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
+// initialize firebase sdk
+const test = require('firebase-functions-test')();
+
 
 describe('dbMessagesOnUpdate function', () => {
     let admin, functions, myFunctions, onceStub, updateStub;
@@ -22,15 +25,6 @@ describe('dbMessagesOnUpdate function', () => {
         // stub admin.initializeApp
         admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // stub functions config
-        functions = require('firebase-functions');
-        sandbox.stub(functions, 'config').returns({
-            firebase: {
-                databaseURL: 'https://not-a-project.firebaseio.com',
-                storageBucket: 'not-a-project.appspot.com',
-            }
-        });
 
         // get cloud functions
         myFunctions = require('../../../index');
@@ -49,6 +43,7 @@ describe('dbMessagesOnUpdate function', () => {
 
     afterEach(() =>  {
         sandbox.restore();
+        test.cleanup();
     });
 
     it('Should update message status in chats', () => {
@@ -62,7 +57,7 @@ describe('dbMessagesOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             senderId: 'sender-id',
             recipientId: 'recipient-id',
             text: 'Text',
@@ -70,7 +65,7 @@ describe('dbMessagesOnUpdate function', () => {
             type: 'message',
             status: 'delivered'
         };
-        const newData = {
+        const afterData = {
             senderId: 'sender-id',
             recipientId: 'recipient-id',
             text: 'Text',
@@ -78,15 +73,20 @@ describe('dbMessagesOnUpdate function', () => {
             type: 'message',
             status: 'read'
         };
-        const fakeEvent = {
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+            }
         };
 
-        return myFunctions.dbMessagesOnUpdate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbMessagesOnUpdate);
+
+        return wrapped(change, context)
             .then(() => {
                 // check the update values
                 const expectedUpdateArg = {
@@ -108,7 +108,7 @@ describe('dbMessagesOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             senderId: 'sender-id',
             recipientId: 'recipient-id',
             text: 'Text',
@@ -116,7 +116,7 @@ describe('dbMessagesOnUpdate function', () => {
             type: 'message',
             status: 'sent'
         };
-        const newData = {
+        const afterData = {
             senderId: 'sender-id',
             recipientId: 'recipient-id',
             text: 'Text',
@@ -124,15 +124,20 @@ describe('dbMessagesOnUpdate function', () => {
             type: 'message',
             status: 'delivered'
         };
-        const fakeEvent = {
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+            }
         };
 
-        return expect(myFunctions.dbMessagesOnUpdate(fakeEvent)).to.be.eventually.true;
+        const wrapped = test.wrap(myFunctions.dbMessagesOnUpdate);
+
+        return expect(wrapped(change, context)).to.be.true;
     });
 
     it('Should not update message status in chats if updated message is not last message', () => {
@@ -146,7 +151,7 @@ describe('dbMessagesOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             senderId: 'sender-id',
             recipientId: 'recipient-id',
             text: 'Text',
@@ -154,7 +159,7 @@ describe('dbMessagesOnUpdate function', () => {
             type: 'message',
             status: 'delivered'
         };
-        const newData = {
+        const afterData = {
             senderId: 'sender-id',
             recipientId: 'recipient-id',
             text: 'Text',
@@ -162,14 +167,19 @@ describe('dbMessagesOnUpdate function', () => {
             type: 'message',
             status: 'read'
         };
-        const fakeEvent = {
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
             params: {
                 chatId: 'chat-id',
                 messageId: 'not-last-msg-id'
-            },
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+            }
         };
 
-        return expect(myFunctions.dbMessagesOnUpdate(fakeEvent)).to.be.eventually.true;
+        const wrapped = test.wrap(myFunctions.dbMessagesOnUpdate);
+
+        return expect(wrapped(change, context)).to.be.eventually.true;
     });
 });

@@ -13,24 +13,18 @@ chai.use(chaiAsPromised);
 const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
+// initialize firebase sdk
+const test = require('firebase-functions-test')();
+
 
 describe('dbUserProfileOnUpdate function', () => {
-    let admin, functions, myFunctions, onceStub, updateStub;
+    let admin, myFunctions, onceStub, updateStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
         admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // stub functions config
-        functions = require('firebase-functions');
-        sandbox.stub(functions, 'config').returns({
-            firebase: {
-                databaseURL: 'https://not-a-project.firebaseio.com',
-                storageBucket: 'not-a-project.appspot.com',
-            }
-        });
 
         // get cloud functions
         myFunctions = require('../../../../index');
@@ -49,6 +43,7 @@ describe('dbUserProfileOnUpdate function', () => {
 
     afterEach(() =>  {
         sandbox.restore();
+        test.cleanup();
     });
 
     it('Should update users new name in chats', () => {
@@ -63,7 +58,7 @@ describe('dbUserProfileOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'Lastname',
@@ -72,7 +67,7 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['some-photo-link']
         };
-        const newData = {
+        const afterData = {
             uid: 'user-id',
             firstName: 'NewFirstname',
             lastName: 'Lastname',
@@ -81,11 +76,19 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['some-photo-link']
         };
-        const fakeEvent = {
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
+            params: {
+                userId: 'user-id'
+            }
         };
 
-        return myFunctions.dbUsersProfileOnUpdate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
+
+        return wrapped(change, context)
             .then(() => {
                 // check the update object
                 const expectedUpdateArgs = {
@@ -108,7 +111,7 @@ describe('dbUserProfileOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'Lastname',
@@ -117,7 +120,7 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['some-photo-link']
         };
-        const newData = {
+        const afterData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'Lastname',
@@ -126,11 +129,19 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['new-photo-link']
         };
-        const fakeEvent = {
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
+            params: {
+                userId: 'user-id'
+            }
         };
 
-        return myFunctions.dbUsersProfileOnUpdate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
+
+        return wrapped(change, context)
             .then(() => {
                 // check the update object
                 const expectedUpdateArgs = {
@@ -153,7 +164,7 @@ describe('dbUserProfileOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'Lastname',
@@ -162,7 +173,7 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['some-photo-link']
         };
-        const newData = {
+        const afterData = {
             uid: 'user-id',
             firstName: 'NewFirstname',
             lastName: 'Lastname',
@@ -171,11 +182,19 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['new-photo-link']
         };
-        const fakeEvent = {
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
+            params: {
+                userId: 'user-id'
+            }
         };
 
-        return myFunctions.dbUsersProfileOnUpdate(fakeEvent)
+        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
+
+        return wrapped(change, context)
             .then(() => {
                 // check the update object
                 const expectedUpdateArgs = {
@@ -200,7 +219,7 @@ describe('dbUserProfileOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'Lastname',
@@ -209,7 +228,7 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['some-photo-link']
         };
-        const newData = {
+        const afterData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'NewLastname',
@@ -218,11 +237,19 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some new about 1...',
             photos: ['some-photo-link']
         };
-        const fakeEvent = {
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
+            params: {
+                userId: 'user-id'
+            }
         };
 
-        return expect(myFunctions.dbUsersProfileOnUpdate(fakeEvent)).to.eventually.be.true;
+        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
+
+        return expect(wrapped(change, context)).to.be.true;
     });
 
     it('Should not update chats if there are none', () => {
@@ -233,7 +260,7 @@ describe('dbUserProfileOnUpdate function', () => {
         onceStub.returns(Promise.resolve(onceResult));
         
         // create fake database update event
-        const oldData = {
+        const beforeData = {
             uid: 'user-id',
             firstName: 'Firstname',
             lastName: 'Lastname',
@@ -242,7 +269,7 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['some-photo-link']
         };
-        const newData = {
+        const afterData = {
             uid: 'user-id',
             firstName: 'NewFirstname',
             lastName: 'Lastname',
@@ -251,10 +278,18 @@ describe('dbUserProfileOnUpdate function', () => {
             about: 'Some about 1...',
             photos: ['new-photo-link']
         };
-        const fakeEvent = {
-            data: new functions.database.DeltaSnapshot(null, null, oldData, newData),
+        const beforeSnap = test.database.makeDataSnapshot(beforeData);
+        const afterSnap = test.database.makeDataSnapshot(afterData);
+
+        const change = test.makeChange(beforeSnap, afterSnap);
+        const context = {
+            params: {
+                userId: 'user-id'
+            }
         };
 
-        return expect(myFunctions.dbUsersProfileOnUpdate(fakeEvent)).to.eventually.be.true;
+        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
+
+        return expect(wrapped(change, context)).to.eventually.be.true;
     });
 });

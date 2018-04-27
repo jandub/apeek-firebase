@@ -18,7 +18,7 @@ const functions = require('firebase-functions');
 // admin SDK can be only initialized once, wrap in try-catch
 const admin = require('firebase-admin');
 try {
-    admin.initializeApp(functions.config().firebase);
+    admin.initializeApp();
 } catch (e) {}
 
 const consts = require('../../constants');
@@ -26,35 +26,31 @@ const consts = require('../../constants');
 
 module.exports = functions.database
     .ref('/messages/{chatId}/{messageId}')
-    .onUpdate(event => {
-        return updateChats(event);
+    .onUpdate((change, context) => {
+        const msg = change.after.val();
+
+        // update only if status changes to "read"
+        if (msg.status != consts.MSG_STATUS_READ) {
+            return true;
+        }
+
+        const db = admin.database();
+        const chatId = context.params.chatId;
+        const msgId = context.params.messageId;
+
+        return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
+            .then(snapshot => {
+                const chat = snapshot.val();
+
+                // updated message is not the last
+                if (chat.lastMsgId != msgId) {
+                    return true;
+                }
+
+                const updates = {};
+                updates[`/chats/${msg.recipientId}/${chatId}/lastMsgStatus`] = consts.MSG_STATUS_READ;
+                updates[`/chats/${msg.senderId}/${chatId}/lastMsgStatus`] = consts.MSG_STATUS_READ;
+
+                return db.ref().update(updates);
+            });
     });
-
-const updateChats = event => {
-    const msg = event.data.val();
-
-    // update only if status changes to "read"
-    if (msg.status != consts.MSG_STATUS_READ) {
-        return true;
-    }
-
-    const db = admin.database();
-    const chatId = event.params.chatId;
-    const msgId = event.params.messageId;
-
-    return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
-        .then(snapshot => {
-            const chat = snapshot.val();
-
-            // updated message is not the last
-            if (chat.lastMsgId != msgId) {
-                return true;
-            }
-
-            const updates = {};
-            updates[`/chats/${msg.recipientId}/${chatId}/lastMsgStatus`] = consts.MSG_STATUS_READ;
-            updates[`/chats/${msg.senderId}/${chatId}/lastMsgStatus`] = consts.MSG_STATUS_READ;
-
-            return db.ref().update(updates);
-        });
-};
