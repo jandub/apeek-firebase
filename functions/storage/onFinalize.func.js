@@ -1,5 +1,5 @@
 /*
- *  Triggers when a file is added to/deleted from the storage.
+ *  Triggers when a file is added to the storage.
  *
  *  This function links the file with the user's profile
  *  in the database.
@@ -23,7 +23,7 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
     // validate path - expects user_photos/${user_uid}/${filename}
     const pathParts = filePath.split('/');
 
-    if (pathParts.length != 3 || pathParts[0] != consts.STORAGE_PHOTOS) {
+    if (pathParts.length != 3 || pathParts[0] != consts.STORAGE_PHOTOS || !pathParts[2].length) {
         // not a user profile photo upload
         return true;
     }
@@ -58,22 +58,12 @@ const deleteFile = path => {
 
 const getUpdatedUserPhotos = (photos, object) => {
     const link = `gs://${object.bucket}/${object.name}`;
+    const position = getPositionFromMeta(object.metadata);
 
-    // the resourceState is 'exists' for upload or 'not_exists' for delete
-    if (object.resourceState == 'exists') {
-        const position = getPositionFromMeta(object.metadata);
-
-        if (!position || position > photos.length) {
-            photos.push(link);
-        } else {
-            photos.splice(position - 1, 0, link);
-        }
+    if (!position || position > photos.length) {
+        photos.push(link);
     } else {
-        const idx = photos.indexOf(link);
-        
-        if (idx != -1) {
-            photos.splice(idx, 1);
-        }
+        photos.splice(position - 1, 0, link);
     }
 
     return photos;

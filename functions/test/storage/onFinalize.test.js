@@ -60,9 +60,7 @@ describe('storageOnFinalize function', () => {
         const fakeEvent = {
             data: {
                 bucket: 'some-bucket',
-                metadata: {},
-                name: 'user_photos/user1/some-filename.jpg',
-                resourceState: 'exists'
+                name: 'user_photos/user1/some-filename.jpg'
             },
         };
 
@@ -93,8 +91,7 @@ describe('storageOnFinalize function', () => {
                 metadata: {
                     position: '2'
                 },
-                name: 'user_photos/user1/some-filename.jpg',
-                resourceState: 'exists'
+                name: 'user_photos/user1/some-filename.jpg'
             },
         };
 
@@ -125,8 +122,7 @@ describe('storageOnFinalize function', () => {
                 metadata: {
                     position: '8'
                 },
-                name: 'user_photos/user1/some-filename.jpg',
-                resourceState: 'exists',
+                name: 'user_photos/user1/some-filename.jpg'
             },
         };
 
@@ -154,9 +150,7 @@ describe('storageOnFinalize function', () => {
         const fakeEvent = {
             data: {
                 bucket: 'some-bucket',
-                metadata: {},
-                name: 'user_photos/user1/some-filename.jpg',
-                resourceState: 'exists',
+                name: 'user_photos/user1/some-filename.jpg'
             },
         };
 
@@ -184,9 +178,7 @@ describe('storageOnFinalize function', () => {
         const fakeEvent = {
             data: {
                 bucket: 'some-bucket',
-                metadata: {},
-                name: 'user_photos/user1/some-filename.jpg',
-                resourceState: 'exists'
+                name: 'user_photos/user1/some-filename.jpg'
             },
         };
 
@@ -200,5 +192,32 @@ describe('storageOnFinalize function', () => {
                 expect(deleteStub).to.be.called;
                 expect(fileStub).to.be.calledWith(expectedArg);
             });
+    });
+
+    it('Should not trigger for other paths', () => {
+        // create fake event
+        const fakeEvent = {
+            data: {
+                bucket: 'some-bucket',
+                name: 'temp/user1/filename.jpg'
+            },
+        };
+
+        expect(myFunctions.storageOnFinalize(fakeEvent)).to.be.eventually.true;
+
+        fakeEvent.data.filename = 'user_photos/filename.jpg';
+        expect(myFunctions.storageOnFinalize(fakeEvent)).to.be.eventually.true;
+    });
+
+    it('Should not trigger for directories', () => {
+        // create fake event
+        const fakeEvent = {
+            data: {
+                bucket: 'some-bucket',
+                name: 'user_photos/user1/'
+            },
+        };
+
+        expect(myFunctions.storageOnFinalize(fakeEvent)).to.be.eventually.true;
     });
 });
