@@ -15,11 +15,16 @@
         "install": "cd functions && npm install && cd .. && cd appengine && pip install -t lib -r requirements.txt && cd..",
         "test": "npm run test:rules && npm run test:functions",
         "test:rules": "node_modules/.bin/mocha \"database/test/**/*.test.js\"",
-        "test:functions": "node_modules/.bin/mocha --exit \"functions/test/**/*.test.js\""
+        "test:functions": "node_modules/.bin/mocha --exit \"functions/test/**/*.test.js\"",
+        "eslint": "node_modules/.bin/eslint --ignore-path .gitignore ."
     },
     "devDependencies": {
         "chai": "^4.1.2",
         "chai-as-promised": "^7.1.1",
+        "eslint": "^4.19.1",
+        "eslint-config-airbnb-base": "^12.1.0",
+        "eslint-plugin-chai-friendly": "^0.4.1",
+        "eslint-plugin-import": "^2.11.0",
         "firebase-bolt": "^0.8.2",
         "firebase-functions": "^1.0.1",
         "firebase-functions-test": "^0.1.1",
