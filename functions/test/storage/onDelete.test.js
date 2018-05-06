@@ -1,5 +1,5 @@
 const chai = require('chai');
-const expect = chai.expect;
+const { expect } = chai;
 
 // add sinon plugin to chai
 const sinonChai = require('sinon-chai');
@@ -12,18 +12,18 @@ const sandbox = sinon.sandbox.create();
 // initialize firebase sdk
 const test = require('firebase-functions-test')();
 
+const admin = require('firebase-admin');
+const myFunctions = require('../../index');
+
 
 describe('storageOnDelete function', () => {
-    let admin, myFunctions, onceStub, setStub;
+    let onceStub;
+    let setStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
-        admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // get cloud functions
-        myFunctions = require('../../index');
 
         // stub admin.database().ref().once() and
         // admin.database().ref().set() call
@@ -54,7 +54,7 @@ describe('storageOnDelete function', () => {
             data: {
                 bucket: 'some-bucket',
                 name: 'user_photos/user1/some-filename.jpg'
-            },
+            }
         };
 
         return myFunctions.storageOnDelete(fakeEvent)
@@ -73,7 +73,7 @@ describe('storageOnDelete function', () => {
             data: {
                 bucket: 'some-bucket',
                 name: 'temp/user1/filename.jpg'
-            },
+            }
         };
 
         expect(myFunctions.storageOnDelete(fakeEvent)).to.be.eventually.true;
@@ -88,7 +88,7 @@ describe('storageOnDelete function', () => {
             data: {
                 bucket: 'some-bucket',
                 name: 'user_photos/user1/'
-            },
+            }
         };
 
         expect(myFunctions.storageOnDelete(fakeEvent)).to.be.eventually.true;

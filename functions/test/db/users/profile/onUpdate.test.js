@@ -1,12 +1,12 @@
 const chai = require('chai');
-const expect = chai.expect;
+const { expect } = chai;
 
 // add sinon plugin to chai
 const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 // add chai-as-promised to chai
-const chaiAsPromised = require("chai-as-promised");
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 // get sinon and create sandbox
@@ -16,18 +16,18 @@ const sandbox = sinon.sandbox.create();
 // initialize firebase sdk
 const test = require('firebase-functions-test')();
 
+const admin = require('firebase-admin');
+const myFunctions = require('../../../../index');
+
 
 describe('dbUserProfileOnUpdate function', () => {
-    let admin, myFunctions, onceStub, updateStub;
+    let onceStub;
+    let updateStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
-        admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // get cloud functions
-        myFunctions = require('../../../../index');
 
         // stub admin.database().ref().once() call and
         // admin.database().ref().update() call
@@ -38,10 +38,10 @@ describe('dbUserProfileOnUpdate function', () => {
             once: onceStub
         });
         const databaseStub = sandbox.stub(admin, 'database');
-        databaseStub.get(() => (() => ({ref: refStub})));
+        databaseStub.get(() => (() => ({ ref: refStub })));
     });
 
-    afterEach(() =>  {
+    afterEach(() => {
         sandbox.restore();
         test.cleanup();
     });
@@ -49,14 +49,15 @@ describe('dbUserProfileOnUpdate function', () => {
     it('Should update users new name in chats', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    'chat-uid-1': {recipientId: 'recipient-id-1'},
-                    'chat-uid-2': {recipientId: 'recipient-id-2'},
+            val() {
+                return {
+                    'chat-uid-1': { recipientId: 'recipient-id-1' },
+                    'chat-uid-2': { recipientId: 'recipient-id-2' }
                 };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             uid: 'user-id',
@@ -102,14 +103,15 @@ describe('dbUserProfileOnUpdate function', () => {
     it('Should update users new photo in chats', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    'chat-uid-1': {recipientId: 'recipient-id-1'},
-                    'chat-uid-2': {recipientId: 'recipient-id-2'},
+            val() {
+                return {
+                    'chat-uid-1': { recipientId: 'recipient-id-1' },
+                    'chat-uid-2': { recipientId: 'recipient-id-2' }
                 };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             uid: 'user-id',
@@ -155,14 +157,15 @@ describe('dbUserProfileOnUpdate function', () => {
     it('Should update users new name and photo in chats', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    'chat-uid-1': {recipientId: 'recipient-id-1'},
-                    'chat-uid-2': {recipientId: 'recipient-id-2'},
+            val() {
+                return {
+                    'chat-uid-1': { recipientId: 'recipient-id-1' },
+                    'chat-uid-2': { recipientId: 'recipient-id-2' }
                 };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             uid: 'user-id',
@@ -210,14 +213,15 @@ describe('dbUserProfileOnUpdate function', () => {
     it('Should not update chats if name and photo are unchanged', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    'chat-uid-1': {recipientId: 'recipient-id-1'},
-                    'chat-uid-2': {recipientId: 'recipient-id-2'},
+            val() {
+                return {
+                    'chat-uid-1': { recipientId: 'recipient-id-1' },
+                    'chat-uid-2': { recipientId: 'recipient-id-2' }
                 };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             uid: 'user-id',
@@ -255,10 +259,12 @@ describe('dbUserProfileOnUpdate function', () => {
     it('Should not update chats if there are none', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return null}
+            val() {
+                return null;
+            }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             uid: 'user-id',

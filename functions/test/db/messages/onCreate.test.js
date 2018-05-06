@@ -1,5 +1,5 @@
 const chai = require('chai');
-const expect = chai.expect;
+const { expect } = chai;
 
 // add sinon plugin to chai
 const sinonChai = require('sinon-chai');
@@ -12,18 +12,18 @@ const sandbox = sinon.sandbox.create();
 // initialize firebase sdk
 const test = require('firebase-functions-test')();
 
+const admin = require('firebase-admin');
+const myFunctions = require('../../../index');
+
 
 describe('dbMessagesOnUpdate function', () => {
-    let admin, myFunctions, onceStub, updateStub;
+    let onceStub;
+    let updateStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
-        admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // get cloud functions
-        myFunctions = require('../../../index');
 
         // stub admin.database().ref().once() call and
         // admin.database().ref().update() call
@@ -34,10 +34,10 @@ describe('dbMessagesOnUpdate function', () => {
             once: onceStub
         });
         const databaseStub = sandbox.stub(admin, 'database');
-        databaseStub.get(() => (() => ({ref: refStub})));
+        databaseStub.get(() => (() => ({ ref: refStub })));
     });
 
-    afterEach(() =>  {
+    afterEach(() => {
         sandbox.restore();
         test.cleanup();
     });
@@ -45,30 +45,33 @@ describe('dbMessagesOnUpdate function', () => {
     it('Should create chat nodes when request is sent', () => {
         // set return value for database once call
         const senderResult = {
-            ref: {parent: {key: 'sender-id'}},
-            val() { return {
+            ref: { parent: { key: 'sender-id' } },
+            val() {
+                return {
                     firstName: 'Sender',
-                    photos: ['sender-photo-link'],
+                    photos: ['sender-photo-link']
                 };
             }
         };
         const recipientResult = {
-            ref: {parent: {key: 'recipient-id'}},
-            val() { return {
+            ref: { parent: { key: 'recipient-id' } },
+            val() {
+                return {
                     firstName: 'Recipient',
-                    photos: ['recipient-photo-link'],
+                    photos: ['recipient-photo-link']
                 };
             }
         };
         onceStub.onFirstCall().returns(Promise.resolve(senderResult));
         onceStub.onSecondCall().returns(Promise.resolve(recipientResult));
-        
+
         // create snapshot and context
         const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
         const msgSnap = {
-            ref: {update: msgUpdateStub},
+            ref: { update: msgUpdateStub },
             key: 'msg-id',
-            val() { return {
+            val() {
+                return {
                     senderId: 'sender-id',
                     recipientId: 'recipient-id',
                     text: 'Text',
@@ -90,7 +93,7 @@ describe('dbMessagesOnUpdate function', () => {
         return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({ status: 'delivered' });
 
                 // check the update arguments
                 const senderChat = {
@@ -105,7 +108,7 @@ describe('dbMessagesOnUpdate function', () => {
                     lastMsgStatus: 'delivered',
                     lastMsgType: 'request'
                 };
-                const recipientChat = {...senderChat};
+                const recipientChat = { ...senderChat };
                 recipientChat.recipientId = 'sender-id';
                 recipientChat.recipientName = 'Sender';
                 recipientChat.recipientUserPhoto = 'sender-photo-link';
@@ -122,9 +125,10 @@ describe('dbMessagesOnUpdate function', () => {
         // create snapshot and context
         const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
         const msgSnap = {
-            ref: {update: msgUpdateStub},
+            ref: { update: msgUpdateStub },
             key: 'msg-id',
-            val() { return {
+            val() {
+                return {
                     senderId: 'sender-id',
                     recipientId: 'recipient-id',
                     text: 'Text',
@@ -146,7 +150,7 @@ describe('dbMessagesOnUpdate function', () => {
         return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({ status: 'delivered' });
 
                 // check the update arguments
                 const expectedUpdateArg = {
@@ -154,8 +158,8 @@ describe('dbMessagesOnUpdate function', () => {
                     '/chats/recipient-id/chat-id/lastMsgId': 'msg-id',
                     '/chats/sender-id/chat-id/lastMsgTs': 1234567890,
                     '/chats/recipient-id/chat-id/lastMsgTs': 1234567890,
-                    '/chats/sender-id/chat-id/lastMsgText': 'Text', 
-                    '/chats/recipient-id/chat-id/lastMsgText': 'Text', 
+                    '/chats/sender-id/chat-id/lastMsgText': 'Text',
+                    '/chats/recipient-id/chat-id/lastMsgText': 'Text',
                     '/chats/sender-id/chat-id/lastMsgSenderId': 'sender-id',
                     '/chats/recipient-id/chat-id/lastMsgSenderId': 'sender-id',
                     '/chats/sender-id/chat-id/lastMsgStatus': 'delivered',
@@ -173,9 +177,10 @@ describe('dbMessagesOnUpdate function', () => {
         // create snapshot and context
         const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
         const msgSnap = {
-            ref: {update: msgUpdateStub},
+            ref: { update: msgUpdateStub },
             key: 'msg-id',
-            val() { return {
+            val() {
+                return {
                     senderId: 'sender-id',
                     recipientId: 'recipient-id',
                     text: 'Text',
@@ -197,7 +202,7 @@ describe('dbMessagesOnUpdate function', () => {
         return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({ status: 'delivered' });
 
                 // check the update arguments
                 const expectedUpdateArg = {
@@ -205,8 +210,8 @@ describe('dbMessagesOnUpdate function', () => {
                     '/chats/recipient-id/chat-id/lastMsgId': 'msg-id',
                     '/chats/sender-id/chat-id/lastMsgTs': 1234567890,
                     '/chats/recipient-id/chat-id/lastMsgTs': 1234567890,
-                    '/chats/sender-id/chat-id/lastMsgText': 'Text', 
-                    '/chats/recipient-id/chat-id/lastMsgText': 'Text', 
+                    '/chats/sender-id/chat-id/lastMsgText': 'Text',
+                    '/chats/recipient-id/chat-id/lastMsgText': 'Text',
                     '/chats/sender-id/chat-id/lastMsgSenderId': 'sender-id',
                     '/chats/recipient-id/chat-id/lastMsgSenderId': 'sender-id',
                     '/chats/sender-id/chat-id/lastMsgStatus': 'delivered',
@@ -224,9 +229,10 @@ describe('dbMessagesOnUpdate function', () => {
         // create snapshot and context
         const msgUpdateStub = sandbox.stub().returns(Promise.resolve());
         const msgSnap = {
-            ref: {update: msgUpdateStub},
+            ref: { update: msgUpdateStub },
             key: 'msg-id',
-            val() { return {
+            val() {
+                return {
                     senderId: 'sender-id',
                     recipientId: 'recipient-id',
                     text: 'Text',
@@ -248,7 +254,7 @@ describe('dbMessagesOnUpdate function', () => {
         return wrapped(msgSnap, context)
             .then(() => {
                 // check if message status gets updated
-                expect(msgUpdateStub).to.be.calledWith({status: 'delivered'});
+                expect(msgUpdateStub).to.be.calledWith({ status: 'delivered' });
 
                 // check the update arguments
                 const expectedUpdateArg = {
@@ -256,8 +262,8 @@ describe('dbMessagesOnUpdate function', () => {
                     '/chats/recipient-id/chat-id/lastMsgId': 'msg-id',
                     '/chats/sender-id/chat-id/lastMsgTs': 1234567890,
                     '/chats/recipient-id/chat-id/lastMsgTs': 1234567890,
-                    '/chats/sender-id/chat-id/lastMsgText': 'Text', 
-                    '/chats/recipient-id/chat-id/lastMsgText': 'Text', 
+                    '/chats/sender-id/chat-id/lastMsgText': 'Text',
+                    '/chats/recipient-id/chat-id/lastMsgText': 'Text',
                     '/chats/sender-id/chat-id/lastMsgSenderId': 'sender-id',
                     '/chats/recipient-id/chat-id/lastMsgSenderId': 'sender-id',
                     '/chats/sender-id/chat-id/lastMsgStatus': 'delivered',

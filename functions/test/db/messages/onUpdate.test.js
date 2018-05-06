@@ -1,12 +1,12 @@
 const chai = require('chai');
-const expect = chai.expect;
+const { expect } = chai;
 
 // add sinon plugin to chai
 const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 // add chai-as-promised to chai
-const chaiAsPromised = require("chai-as-promised");
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 // get sinon and create sandbox
@@ -16,18 +16,18 @@ const sandbox = sinon.sandbox.create();
 // initialize firebase sdk
 const test = require('firebase-functions-test')();
 
+const admin = require('firebase-admin');
+const myFunctions = require('../../../index');
+
 
 describe('dbMessagesOnUpdate function', () => {
-    let admin, functions, myFunctions, onceStub, updateStub;
+    let onceStub;
+    let updateStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
-        admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // get cloud functions
-        myFunctions = require('../../../index');
 
         // stub admin.database().ref().once() call and
         // admin.database().ref().update() call
@@ -38,10 +38,10 @@ describe('dbMessagesOnUpdate function', () => {
             once: onceStub
         });
         const databaseStub = sandbox.stub(admin, 'database');
-        databaseStub.get(() => (() => ({ref: refStub})));
+        databaseStub.get(() => (() => ({ ref: refStub })));
     });
 
-    afterEach(() =>  {
+    afterEach(() => {
         sandbox.restore();
         test.cleanup();
     });
@@ -49,13 +49,12 @@ describe('dbMessagesOnUpdate function', () => {
     it('Should update message status in chats', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    lastMsgId: 'msg-id'
-                };
+            val() {
+                return { lastMsgId: 'msg-id' };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             senderId: 'sender-id',
@@ -100,13 +99,12 @@ describe('dbMessagesOnUpdate function', () => {
     it('Should not update message status in chats if the new status is "delivered"', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    lastMsgId: 'msg-id'
-                };
+            val() {
+                return { lastMsgId: 'msg-id' };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             senderId: 'sender-id',
@@ -143,13 +141,12 @@ describe('dbMessagesOnUpdate function', () => {
     it('Should not update message status in chats if updated message is not last message', () => {
         // set return value for database once call
         const onceResult = {
-            val: () => { return {
-                    lastMsgId: 'msg-id'
-                };
+            val() {
+                return { lastMsgId: 'msg-id' };
             }
         };
         onceStub.returns(Promise.resolve(onceResult));
-        
+
         // create fake database update event
         const beforeData = {
             senderId: 'sender-id',

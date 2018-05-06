@@ -1,5 +1,5 @@
 const chai = require('chai');
-const expect = chai.expect;
+const { expect } = chai;
 
 // add sinon plugin to chai
 const sinonChai = require('sinon-chai');
@@ -12,25 +12,27 @@ const sandbox = sinon.sandbox.create();
 // initialize firebase sdk
 const test = require('firebase-functions-test')();
 
+const admin = require('firebase-admin');
+const myFunctions = require('../../index');
+
 
 describe('storageOnFinalize function', () => {
-    let admin, myFunctions, onceStub, setStub, fileStub, deleteStub;
+    let onceStub;
+    let setStub;
+    let fileStub;
+    let deleteStub;
 
     // set up stubs
     beforeEach(() => {
         // stub admin.initializeApp
-        admin = require('firebase-admin');
         sandbox.stub(admin, 'initializeApp');
-
-        // get cloud functions
-        myFunctions = require('../../index');
 
         // stub admin.storage().bucket().file().delete() call
         deleteStub = sandbox.stub();
-        fileStub = sandbox.stub().returns({delete: deleteStub});
-        const bucketStub = sandbox.stub().returns({file: fileStub});
+        fileStub = sandbox.stub().returns({ delete: deleteStub });
+        const bucketStub = sandbox.stub().returns({ file: fileStub });
         const storageStub = sandbox.stub(admin, 'storage');
-        storageStub.get(() => (() => ({bucket: bucketStub})));
+        storageStub.get(() => (() => ({ bucket: bucketStub })));
 
         // stub admin.database().ref().once() and
         // admin.database().ref().set() call
@@ -41,10 +43,10 @@ describe('storageOnFinalize function', () => {
             set: setStub
         });
         const databaseStub = sandbox.stub(admin, 'database');
-        databaseStub.get(() => (() => ({ref: refStub})));
+        databaseStub.get(() => (() => ({ ref: refStub })));
     });
 
-    afterEach(() =>  {
+    afterEach(() => {
         sandbox.restore();
         test.cleanup();
     });
@@ -55,13 +57,13 @@ describe('storageOnFinalize function', () => {
         onceStub.returns(Promise.resolve({
             val: () => { return photos; }
         }));
-        
+
         // create fake event
         const fakeEvent = {
             data: {
                 bucket: 'some-bucket',
                 name: 'user_photos/user1/some-filename.jpg'
-            },
+            }
         };
 
         return myFunctions.storageOnFinalize(fakeEvent)
@@ -83,7 +85,7 @@ describe('storageOnFinalize function', () => {
         onceStub.returns(Promise.resolve({
             val: () => { return photos; }
         }));
-        
+
         // create fake event
         const fakeEvent = {
             data: {
@@ -92,7 +94,7 @@ describe('storageOnFinalize function', () => {
                     position: '2'
                 },
                 name: 'user_photos/user1/some-filename.jpg'
-            },
+            }
         };
 
         return myFunctions.storageOnFinalize(fakeEvent)
@@ -114,7 +116,7 @@ describe('storageOnFinalize function', () => {
         onceStub.returns(Promise.resolve({
             val: () => { return photos; }
         }));
-        
+
         // create fake event
         const fakeEvent = {
             data: {
@@ -123,7 +125,7 @@ describe('storageOnFinalize function', () => {
                     position: '8'
                 },
                 name: 'user_photos/user1/some-filename.jpg'
-            },
+            }
         };
 
         return myFunctions.storageOnFinalize(fakeEvent)
@@ -145,13 +147,13 @@ describe('storageOnFinalize function', () => {
         onceStub.returns(Promise.resolve({
             val: () => { return photos; }
         }));
-        
+
         // create fake event
         const fakeEvent = {
             data: {
                 bucket: 'some-bucket',
                 name: 'user_photos/user1/some-filename.jpg'
-            },
+            }
         };
 
         return myFunctions.storageOnFinalize(fakeEvent)
@@ -173,13 +175,13 @@ describe('storageOnFinalize function', () => {
         onceStub.returns(Promise.resolve({
             val: () => { return photos; }
         }));
-        
+
         // create fake event
         const fakeEvent = {
             data: {
                 bucket: 'some-bucket',
                 name: 'user_photos/user1/some-filename.jpg'
-            },
+            }
         };
 
         return myFunctions.storageOnFinalize(fakeEvent)
@@ -200,7 +202,7 @@ describe('storageOnFinalize function', () => {
             data: {
                 bucket: 'some-bucket',
                 name: 'temp/user1/filename.jpg'
-            },
+            }
         };
 
         expect(myFunctions.storageOnFinalize(fakeEvent)).to.be.eventually.true;
@@ -215,7 +217,7 @@ describe('storageOnFinalize function', () => {
             data: {
                 bucket: 'some-bucket',
                 name: 'user_photos/user1/'
-            },
+            }
         };
 
         expect(myFunctions.storageOnFinalize(fakeEvent)).to.be.eventually.true;
