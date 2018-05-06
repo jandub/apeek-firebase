@@ -1,4 +1,6 @@
-dbUsersProfileOnUpdate({
+/* eslint-disable-next-line no-undef */
+dbUsersProfileOnUpdate(
+    {
         before: {
             uid: 'LEx6SCm9iePVPfDKNWsEnAyjVG75',
             firstName: 'Tereza',
@@ -25,6 +27,7 @@ dbUsersProfileOnUpdate({
             }
         },
         params: {
-            userId: 'LEx6SCm9iePVPfDKNWsEnAyjVG75',
+            userId: 'LEx6SCm9iePVPfDKNWsEnAyjVG75'
         }
-    });
+    }
+);

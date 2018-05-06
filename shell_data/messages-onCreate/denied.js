@@ -1,4 +1,6 @@
-dbMessagesOnCreate({
+/* eslint-disable-next-line no-undef */
+dbMessagesOnCreate(
+    {
         senderId: 'LEx6SCm9iePVPfDKNWsEnAyjVG75',
         recipientId: 'LEx6SCm9iePVPfDKNWsEnAyjVG74',
         text: '',
@@ -13,7 +15,8 @@ dbMessagesOnCreate({
             }
         },
         params: {
-            chatId: 'test_chat_id', 
+            chatId: 'test_chat_id',
             messageId: 'test_msg_den_id'
         }
-    });
+    }
+);

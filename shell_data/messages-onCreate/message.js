@@ -1,4 +1,6 @@
-dbMessagesOnCreate({
+/* eslint-disable-next-line no-undef */
+dbMessagesOnCreate(
+    {
         senderId: 'LEx6SCm9iePVPfDKNWsEnAyjVG74',
         recipientId: 'LEx6SCm9iePVPfDKNWsEnAyjVG75',
         text: 'Some random text...',
@@ -15,4 +17,5 @@ dbMessagesOnCreate({
         params: {
             chatId: 'test_chat_id'
         }
-    });
+    }
+);

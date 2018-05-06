@@ -1,3 +1,4 @@
+/* eslint-disable-next-line no-undef */
 authOnCreate({
     displayName: 'Fake Name',
     email: 'fake@email.cz',
@@ -13,5 +14,5 @@ authOnCreate({
         providerId: 'facebook.com',
         uid: '<fb-user-uid>'
     }],
-    uid: 'DhW1EpQpTBd9ObJ68t2cPJs2MyD3' }
-);
+    uid: 'DhW1EpQpTBd9ObJ68t2cPJs2MyD3'
+});

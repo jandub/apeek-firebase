@@ -1,4 +1,6 @@
-dbMessagesOnUpdate({
+/* eslint-disable-next-line no-undef */
+dbMessagesOnUpdate(
+    {
         before: {
             senderId: 'LEx6SCm9iePVPfDKNWsEnAyjVG74',
             recipientId: 'LEx6SCm9iePVPfDKNWsEnAyjVG75',
@@ -23,7 +25,8 @@ dbMessagesOnUpdate({
             }
         },
         params: {
-            chatId: 'test_chat_id', 
+            chatId: 'test_chat_id',
             messageId: 'test_msg_req_id'
         }
-    });
+    }
+);
