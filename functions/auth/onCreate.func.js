@@ -13,7 +13,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 try {
     admin.initializeApp();
-} catch(e) {}
+// eslint-disable-next-line no-empty
+} catch (e) {}
 
 
 const consts = require('../constants');
@@ -47,8 +48,8 @@ const createNewUser = user => {
             interests: ''
         },
         meta: {
-            email: user.email,
-        },
+            email: user.email
+        }
     };
 
     return db.ref(`users/${user.uid}`).set(newUser);
@@ -64,8 +65,7 @@ const saveProfilePhoto = user => {
 
     return axios.get(fbLink)
         .then(response => {
-            const url = response.data.data.url;
-            const isSilhouette = response.data.data.is_silhouette;
+            const { url, is_silhouette: isSilhouette } = response.data.data;
 
             // facebook user has no profile photo
             if (isSilhouette) {
@@ -86,7 +86,7 @@ const saveUrlToBucket = (userId, url) => {
     const bucket = admin.storage().bucket(bucketName);
     const fileId = uuid.v4();
     const options = {
-        destination: `${consts.STORAGE_PHOTOS}/${userId}/${fileId}.jpg`,
+        destination: `${consts.STORAGE_PHOTOS}/${userId}/${fileId}.jpg`
     };
 
     return bucket.upload(url, options);

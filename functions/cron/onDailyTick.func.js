@@ -10,6 +10,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 try {
     admin.initializeApp();
+// eslint-disable-next-line no-empty
 } catch (e) {}
 
 

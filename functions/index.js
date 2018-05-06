@@ -12,13 +12,14 @@
 const glob = require('glob');
 const camelCase = require('camelcase');
 
-let files = glob.sync('./**/*.func.js', {cwd: __dirname, ignore: './node_modules/**'});
+const files = glob.sync('./**/*.func.js', { cwd: __dirname, ignore: './node_modules/**' });
 
-for (let file of files) {
+files.forEach(file => {
     // Strip off '.func.js' from the end of filename
-    let functionName = camelCase(file.slice(0, -8).split('/').join('_'));
+    const functionName = camelCase(file.slice(0, -8).split('/').join('_'));
 
     if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === functionName) {
+        // eslint-disable-next-line global-require, import/no-dynamic-require
         exports[functionName] = require(file);
     }
-}
+});

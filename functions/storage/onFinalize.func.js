@@ -11,7 +11,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 try {
     admin.initializeApp();
-} catch(e) {}
+// eslint-disable-next-line no-empty
+} catch (e) {}
 
 
 const consts = require('../constants');
@@ -23,11 +24,11 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
     // validate path - expects user_photos/${user_uid}/${filename}
     const pathParts = filePath.split('/');
 
-    if (pathParts.length != 3 || pathParts[0] != consts.STORAGE_PHOTOS || !pathParts[2].length) {
+    if (pathParts.length !== 3 || pathParts[0] !== consts.STORAGE_PHOTOS || !pathParts[2].length) {
         // not a user profile photo upload
         return true;
     }
-    
+
     const db = admin.database();
     const userId = pathParts[1];
 
@@ -38,7 +39,7 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
             let userPhotos = snapshot.val() || [];
 
             // user has already maximum amount of photos
-            if (userPhotos.length == consts.USER_PHOTOS_MAX) {
+            if (userPhotos.length === consts.USER_PHOTOS_MAX) {
                 return deleteFile(filePath);
             }
 
@@ -71,12 +72,12 @@ const getUpdatedUserPhotos = (photos, object) => {
 
 const getPositionFromMeta = meta => {
     if (meta && meta.position) {
-        const pos = parseInt(meta.position);
+        const pos = parseInt(meta.position, 10);
 
         if (pos > 0 && pos <= consts.USER_PHOTOS_MAX) {
             return pos;
         }
     }
 
-    return null
+    return null;
 };

@@ -1,8 +1,8 @@
 /**
  *  Triggers when a message is updated
- *  The only allowed update for messages is changing the 
+ *  The only allowed update for messages is changing the
  *  message status from "delivered" to "read"
- *  If the updated message is the last one, the function 
+ *  If the updated message is the last one, the function
  *  updates chat nodes and sets lastMsgStatus to "read"
  *
  *  The message status workflow:
@@ -19,6 +19,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 try {
     admin.initializeApp();
+// eslint-disable-next-line no-empty
 } catch (e) {}
 
 const consts = require('../../constants');
@@ -30,20 +31,19 @@ module.exports = functions.database
         const msg = change.after.val();
 
         // update only if status changes to "read"
-        if (msg.status != consts.MSG_STATUS_READ) {
+        if (msg.status !== consts.MSG_STATUS_READ) {
             return true;
         }
 
         const db = admin.database();
-        const chatId = context.params.chatId;
-        const msgId = context.params.messageId;
+        const { chatId, messageId } = context.params;
 
         return db.ref(`/chats/${msg.senderId}/${chatId}`).once('value')
             .then(snapshot => {
                 const chat = snapshot.val();
 
                 // updated message is not the last
-                if (chat.lastMsgId != msgId) {
+                if (chat.lastMsgId !== messageId) {
                     return true;
                 }
 

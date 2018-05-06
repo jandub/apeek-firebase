@@ -1,18 +1,18 @@
 /**
  *  Triggers when a new message is created
  *  Changes the status of message to 'delivered'
- *  Preforms different actions depending on the type of the message 
+ *  Preforms different actions depending on the type of the message
  *  Supported types: request|message|approved|denied
- *  
+ *
  *  Request
  *  Request for chatting. Creates a chat node for both users in
- *  /chats/{senderId}/{chatId} and /chats/{recipientId}/{chatId} with 
+ *  /chats/{senderId}/{chatId} and /chats/{recipientId}/{chatId} with
  *  chat status set to pending.
- *  
+ *
  *  Approved/Denied
- *  Approves or denies the request for chatting. Updates the status of 
+ *  Approves or denies the request for chatting. Updates the status of
  *  chat nodes to approved/denied.
- *  
+ *
  *  All messages
  *  Updates the chat nodes with the last message information -
  *  text, sender, timestamp and status.
@@ -24,6 +24,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 try {
     admin.initializeApp();
+// eslint-disable-next-line no-empty
 } catch (e) {}
 
 const consts = require('../../constants');
@@ -33,13 +34,13 @@ module.exports = functions.database
     .ref('/messages/{chatId}/{messageId}')
     .onCreate((msgSnap, context) => {
         return Promise.all([
-                markAsDelivered(msgSnap),
-                handleEvent(msgSnap, context)
-            ]);
+            markAsDelivered(msgSnap),
+            handleEvent(msgSnap, context)
+        ]);
     });
 
 const markAsDelivered = msgSnap => {
-    return msgSnap.ref.update({status: consts.MSG_STATUS_DELIVERED});
+    return msgSnap.ref.update({ status: consts.MSG_STATUS_DELIVERED });
 };
 
 const handleEvent = (msgSnap, context) => {
@@ -52,20 +53,21 @@ const handleEvent = (msgSnap, context) => {
             return handleApproved(msgSnap, context);
         case consts.MSG_TYPE_DENIED:
             return handleDenied(msgSnap, context);
-        case consts.MSG_TYPE_MESSAGE:
+        // consts.MSG_TYPE_MESSAGE
+        default:
             return handleMessage(msgSnap, context);
     }
 };
 
 const handleRequest = (msgSnap, context) => {
     const db = admin.database();
-    const chatId = context.params.chatId;
+    const { chatId } = context.params;
     const msg = msgSnap.val();
 
     return Promise.all([
-            db.ref(`/users/${msg.senderId}/profile`).once('value'),
-            db.ref(`/users/${msg.recipientId}/profile`).once('value')
-        ])
+        db.ref(`/users/${msg.senderId}/profile`).once('value'),
+        db.ref(`/users/${msg.recipientId}/profile`).once('value')
+    ])
         .then(([senderSnap, recipientSnap]) => {
             const senderChat = getNewChatObject(senderSnap, msgSnap);
             const recipientChat = getNewChatObject(recipientSnap, msgSnap);
@@ -118,19 +120,17 @@ const handleMessage = (msgSnap, context) => {
 
 const updateChats = (msgSnap, context, newStatus = null) => {
     const db = admin.database();
-    const chatId = context.params.chatId;
+    const { chatId } = context.params;
 
-    const updates = getChatUpdates(chatId, msgSnap, newStatus); 
+    const updates = getChatUpdates(chatId, msgSnap, newStatus);
 
     return db.ref().update(updates);
 };
 
 const getChatUpdates = (chatId, msgSnap, newStatus) => {
     const msg = msgSnap.val();
-    const msgId = msgSnap.key;
-    
     const newValues = {
-        lastMsgId: msgId,
+        lastMsgId: msgSnap.key,
         lastMsgTs: msg.ts,
         lastMsgText: msg.text,
         lastMsgSenderId: msg.senderId,
@@ -142,12 +142,9 @@ const getChatUpdates = (chatId, msgSnap, newStatus) => {
         newValues.status = newStatus;
     }
 
-    const updates = {};
-
-    for (const [key, value] of Object.entries(newValues)) {
-        updates[`/chats/${msg.senderId}/${chatId}/${key}`] = value;
-        updates[`/chats/${msg.recipientId}/${chatId}/${key}`] = value;
-    }
-
-    return updates;
+    return Object.entries(newValues).reduce((updates, [key, val]) => ({
+        ...updates,
+        [`/chats/${msg.senderId}/${chatId}/${key}`]: val,
+        [`/chats/${msg.recipientId}/${chatId}/${key}`]: val
+    }), {});
 };

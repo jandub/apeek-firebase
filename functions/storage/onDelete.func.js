@@ -11,7 +11,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 try {
     admin.initializeApp();
-} catch(e) {}
+// eslint-disable-next-line no-empty
+} catch (e) {}
 
 
 const consts = require('../constants');
@@ -23,11 +24,11 @@ module.exports = functions.storage.object().onDelete((object, context) => {
     // validate path - expects user_photos/${user_uid}/${filename}
     const pathParts = filePath.split('/');
 
-    if (pathParts.length != 3 || pathParts[0] != consts.STORAGE_PHOTOS || !pathParts[2].length) {
+    if (pathParts.length !== 3 || pathParts[0] !== consts.STORAGE_PHOTOS || !pathParts[2].length) {
         // not a user profile photo upload
         return true;
     }
-    
+
     const db = admin.database();
     const userId = pathParts[1];
 
@@ -36,8 +37,8 @@ module.exports = functions.storage.object().onDelete((object, context) => {
             const userPhotos = snapshot.val();
             const link = `gs://${object.bucket}/${object.name}`;
             const idx = userPhotos.indexOf(link);
-        
-            if (idx != -1) {
+
+            if (idx !== -1) {
                 userPhotos.splice(idx, 1);
             }
 
