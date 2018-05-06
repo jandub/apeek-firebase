@@ -1,12 +1,12 @@
 const chai = require('chai');
-const expect = chai.expect;
+const { expect } = chai;
 
 // add targaryen plugin to chai
 const targaryen = require('targaryen/plugins/chai');
 chai.use(targaryen);
 
 // load constants
-const {PATH_CONSTS} = require('./paths');
+const { PATH_CONSTS } = require('./paths');
 const consts = require.main.require(PATH_CONSTS);
 
 // add firebase rules
@@ -28,7 +28,7 @@ const getProfile = () => {
         about: 'Something about user1...',
         photos: ['gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg']
     };
-}
+};
 
 
 describe('Users - rules', () => {
@@ -43,11 +43,11 @@ describe('Users - rules', () => {
             });
 
             it('Should allow authenticated user to read her profile', () => {
-                expect({uid: 'user1'}).can.read.path('/users/user1/profile');
+                expect({ uid: 'user1' }).can.read.path('/users/user1/profile');
             });
 
             it('Should allow authenticated user to read other user profiles', () => {
-                expect({uid: 'user2'}).can.read.path('/users/user1/profile');
+                expect({ uid: 'user2' }).can.read.path('/users/user1/profile');
             });
         });
 
@@ -59,12 +59,12 @@ describe('Users - rules', () => {
 
             it('Should allow authenticated user to write into her profile', () => {
                 const profile = getProfile();
-                expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
+                expect({ uid: 'user1' }).can.write(profile).path('/users/user1/profile');
             });
 
             it('Should not allow authenticated user to write into other user profiles', () => {
                 const profile = getProfile();
-                expect({uid: 'user2'}).cannot.write(profile).path('/users/user1/profile');
+                expect({ uid: 'user2' }).cannot.write(profile).path('/users/user1/profile');
             });
         });
     });
@@ -76,25 +76,25 @@ describe('Users - rules', () => {
             });
 
             it('Should not allow authenticated user to read her meta data', () => {
-                expect({uid: 'user1'}).cannot.read.path('/users/user1/meta');
+                expect({ uid: 'user1' }).cannot.read.path('/users/user1/meta');
             });
 
             it('Should not allow authenticated user to read other users meta data', () => {
-                expect({uid: 'user2'}).cannot.read.path('/users/user1/meta');
+                expect({ uid: 'user2' }).cannot.read.path('/users/user1/meta');
             });
         });
 
         describe('Write', () => {
             it('Should not allow anonymous user to write into users meta data', () => {
-                expect(null).cannot.write({test: 'data'}).path('/users/user1/meta');
+                expect(null).cannot.write({ test: 'data' }).path('/users/user1/meta');
             });
 
             it('Should not allow authenticated user to write into her meta data', () => {
-                expect({uid: 'user1'}).cannot.write({test: 'data'}).path('/users/user1/meta');
+                expect({ uid: 'user1' }).cannot.write({ test: 'data' }).path('/users/user1/meta');
             });
 
             it('Should not allow authenticated user to write into other users meta data', () => {
-                expect({uid: 'user2'}).cannot.write({test: 'data'}).path('/users/user1/meta');
+                expect({ uid: 'user2' }).cannot.write({ test: 'data' }).path('/users/user1/meta');
             });
         });
     });
@@ -106,26 +106,26 @@ describe('Users - rules', () => {
             });
 
             it('Should allow authenticated user to read her location', () => {
-                expect({uid: 'user1'}).can.read.path('/users/user1/location');
+                expect({ uid: 'user1' }).can.read.path('/users/user1/location');
             });
 
             it('Should not allow authenticated user to read other user locations', () => {
-                expect({uid: 'user2'}).cannot.read.path('/users/user1/location');
+                expect({ uid: 'user2' }).cannot.read.path('/users/user1/location');
             });
         });
 
         describe('Write', () => {
             // TODO fix test data when the validation is finished
             it('Should not allow anonymous user to write into user locations', () => {
-                expect(null).cannot.write({test: 'data'}).path('/users/user1/location');
+                expect(null).cannot.write({ test: 'data' }).path('/users/user1/location');
             });
 
             it('Should allow authenticated user to write into her location', () => {
-                expect({uid: 'user1'}).can.write({test: 'data'}).path('/users/user1/location');
+                expect({ uid: 'user1' }).can.write({ test: 'data' }).path('/users/user1/location');
             });
 
             it('Should not allow authenticated user to write into other user locations', () => {
-                expect({uid: 'user2'}).cannot.write({test: 'data'}).path('/users/user1/location');
+                expect({ uid: 'user2' }).cannot.write({ test: 'data' }).path('/users/user1/location');
             });
         });
     });
@@ -133,124 +133,124 @@ describe('Users - rules', () => {
     describe('Validation', () => {
         it('Should validate profile', () => {
             let profile = getProfile();
-            expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).can.write(profile).path('/users/user1/profile');
 
             profile = 'test';
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile = null;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate uid', () => {
             const profile = getProfile();
 
             profile.uid = 'user2';
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate firstName', () => {
             const profile = getProfile();
 
             profile.firstName = 123;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
-            profile.firstName = {test: 'data'};
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            profile.firstName = { test: 'data' };
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.firstName = null;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate lastName', () => {
             const profile = getProfile();
 
             profile.lastName = 123;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
-            
-            profile.lastName = {test: 'data'};
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
+
+            profile.lastName = { test: 'data' };
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.lastName = null;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate interests', () => {
             const profile = getProfile();
 
             profile.interests = 123;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
-            
-            profile.interests = {test: 'data'};
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
+
+            profile.interests = { test: 'data' };
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.interests = null;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate about', () => {
             const profile = getProfile();
 
             profile.about = 123;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
-            
-            profile.about = {test: 'data'};
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
+
+            profile.about = { test: 'data' };
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.about = null;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate gender', () => {
             const profile = getProfile();
 
             profile.gender = 'not a valid gender';
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
-            
-            profile.gender = {test: 'data'};
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
+
+            profile.gender = { test: 'data' };
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.gender = null;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
 
         it('Should validate photos', () => {
             const profile = getProfile();
 
             profile.photos = [
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg', 
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/2.jpg', 
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/3.jpg', 
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/4.jpg', 
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/5.jpg', 
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/6.jpg', 
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg',
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/2.jpg',
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/3.jpg',
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/4.jpg',
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/5.jpg',
+                'gs://apeek-ca78d.appspot.com/user_photos/user1/6.jpg',
                 'gs://apeek-ca78d.appspot.com/user_photos/user1/7.jpg'
             ];
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
-            
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
+
             profile.photos = 1234;
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.photos = 'Some string';
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.photos = null;
-            expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).can.write(profile).path('/users/user1/profile');
 
             profile.photos = [];
-            expect({uid: 'user1'}).can.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).can.write(profile).path('/users/user1/profile');
 
             // wrong user uid (folder) in link
             profile.photos = ['gs://apeek-ca78d.appspot.com/user_photos/user2/1.jpg'];
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             // not the right bucket
             profile.photos = ['gs://apeek-abcde.appspot.com/user_photos/user1/1.jpg'];
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             // allows only gs:// links
             profile.photos = ['http://apeek-ca78d.appspot.com/user_photos/user1/1.jpg'];
-            expect({uid: 'user1'}).cannot.write(profile).path('/users/user1/profile');
+            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
     });
 });

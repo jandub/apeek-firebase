@@ -2,7 +2,7 @@
  *  Data for testing rules - users node
  */
 
-const {PATH_CONSTS} = require('./../paths');
+const { PATH_CONSTS } = require('./../paths');
 const consts = require.main.require(PATH_CONSTS);
 
 module.exports = {
@@ -51,7 +51,7 @@ module.exports = {
                 interests: 'Some interests 3...',
                 about: 'Something about user3...',
                 photos: [
-                    'photolink1', 'photolink2', 'photolink3', 
+                    'photolink1', 'photolink2', 'photolink3',
                     'photolink4', 'photolink5', 'photolink6'
                 ]
             },

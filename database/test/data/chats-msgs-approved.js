@@ -2,7 +2,7 @@
  *  Data for testing rules - chats and messages nodes - approved
  */
 
-const {PATH_CONSTS} = require('./../paths');
+const { PATH_CONSTS } = require('./../paths');
 const consts = require.main.require(PATH_CONSTS);
 
 module.exports = {
