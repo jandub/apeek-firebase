@@ -74,15 +74,14 @@
           "barId": {
             ".validate": "newData.isString() && newData.parent().parent().parent().parent().child('bars').child(newData.val()).val() != null"
           },
-          "photos": {
-            "$key1": {
-              ".validate": "($key1 == '0' || $key1 == '1' || $key1 == '2' || $key1 == '3' || $key1 == '4' || $key1 == '5') && newData.isString() && newData.val().beginsWith('gs://apeek-ca78d.appspot.com/user_photos/') && newData.val().contains(auth.uid)"
-            },
-            ".validate": "newData.hasChildren()"
-          },
           "$other": {
             ".validate": "false"
           }
+        },
+        "photos": {
+          ".validate": "false",
+          ".read": "auth != null",
+          ".write": "false"
         },
         "meta": {
           ".validate": "false",

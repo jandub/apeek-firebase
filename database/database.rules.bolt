@@ -133,6 +133,16 @@ path /users/{user_uid} is User {
             isCurrentUser(user_uid)
         }
     }
+    /photos {
+        // users can see all profile photos
+        read() {
+            isLoggedIn()
+        }
+        // done by firebase admin in storage trigger
+        write() {
+            false
+        }
+    }
     /meta {
         // only for firebase functions as admin
         read() {
@@ -167,7 +177,8 @@ type Message {
 
 type User {
     profile: UserProfile,
-    // no need to validate, only for server
+    // no need to validate, write only as admin
+    photos: Null,
     meta: Null,
     location: UserLocation | Null
 }
@@ -179,10 +190,7 @@ type UserProfile {
     gender: Gender,
     interests: String,
     about: String,
-    barId: BarId | Null,
-    // Array is saved as object - ['test'] => {'0' => 'test'}
-    // See https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
-    photos: Map<PhotoKey, StorageLink>
+    barId: BarId | Null
 }
 
 // UserId - checks if user node with given uid exists
@@ -239,24 +247,6 @@ type BarId extends String {
 type ProfileUserId extends String {
     validate() {
        user_uid == this;
-    }
-}
-
-type PhotoKey extends String {
-    validate() {
-        this == "0" ||
-        this == "1" ||
-        this == "2" ||
-        this == "3" ||
-        this == "4" ||
-        this == "5"
-    }
-}
-
-type StorageLink extends String {
-    validate() {
-        this.beginsWith("gs://apeek-ca78d.appspot.com/user_photos/") &&
-        this.contains(auth.uid)
     }
 }
 

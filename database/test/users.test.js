@@ -25,8 +25,7 @@ const getProfile = () => {
         lastName: 'Lastname1',
         gender: consts.GENDER_MALE,
         interests: 'Some interests 1...',
-        about: 'Something about user1...',
-        photos: ['gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg']
+        about: 'Something about user1...'
     };
 };
 
@@ -65,6 +64,36 @@ describe('Users - rules', () => {
             it('Should not allow authenticated user to write into other user profiles', () => {
                 const profile = getProfile();
                 expect({ uid: 'user2' }).cannot.write(profile).path('/users/user1/profile');
+            });
+        });
+    });
+
+    describe('Photos', () => {
+        describe('Read', () => {
+            it('Should not allow anonymous user to read users photos', () => {
+                expect(null).cannot.read.path('/users/user1/photos');
+            });
+
+            it('Should allow authenticated user to read her photos', () => {
+                expect({ uid: 'user1' }).can.read.path('/users/user1/photos');
+            });
+
+            it('Should allow authenticated user to read other users photos', () => {
+                expect({ uid: 'user2' }).can.read.path('/users/user1/photos');
+            });
+        });
+
+        describe('Write', () => {
+            it('Should not allow anonymous user to write into users photos', () => {
+                expect(null).cannot.write({ test: 'data' }).path('/users/user1/photos');
+            });
+
+            it('Should not allow authenticated user to write into her photos', () => {
+                expect({ uid: 'user1' }).cannot.write({ test: 'data' }).path('/users/user1/photos');
+            });
+
+            it('Should not allow authenticated user to write into other users photos', () => {
+                expect({ uid: 'user2' }).cannot.write({ test: 'data' }).path('/users/user1/photos');
             });
         });
     });
@@ -211,45 +240,6 @@ describe('Users - rules', () => {
             expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
 
             profile.gender = null;
-            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
-        });
-
-        it('Should validate photos', () => {
-            const profile = getProfile();
-
-            profile.photos = [
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/1.jpg',
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/2.jpg',
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/3.jpg',
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/4.jpg',
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/5.jpg',
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/6.jpg',
-                'gs://apeek-ca78d.appspot.com/user_photos/user1/7.jpg'
-            ];
-            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
-
-            profile.photos = 1234;
-            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
-
-            profile.photos = 'Some string';
-            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
-
-            profile.photos = null;
-            expect({ uid: 'user1' }).can.write(profile).path('/users/user1/profile');
-
-            profile.photos = [];
-            expect({ uid: 'user1' }).can.write(profile).path('/users/user1/profile');
-
-            // wrong user uid (folder) in link
-            profile.photos = ['gs://apeek-ca78d.appspot.com/user_photos/user2/1.jpg'];
-            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
-
-            // not the right bucket
-            profile.photos = ['gs://apeek-abcde.appspot.com/user_photos/user1/1.jpg'];
-            expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
-
-            // allows only gs:// links
-            profile.photos = ['http://apeek-ca78d.appspot.com/user_photos/user1/1.jpg'];
             expect({ uid: 'user1' }).cannot.write(profile).path('/users/user1/profile');
         });
     });
