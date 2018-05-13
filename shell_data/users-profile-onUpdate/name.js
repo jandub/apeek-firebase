@@ -7,8 +7,7 @@ dbUsersProfileOnUpdate(
             lastName: 'Name',
             gender: 'female',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['testlink']
+            about: 'Some about 1...'
         },
         after: {
             uid: 'LEx6SCm9iePVPfDKNWsEnAyjVG75',
@@ -16,8 +15,7 @@ dbUsersProfileOnUpdate(
             lastName: 'NewLastName',
             gender: 'male',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['testlink2']
+            about: 'Some about 1...'
         }
     },
     {

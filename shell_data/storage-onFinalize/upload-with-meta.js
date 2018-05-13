@@ -5,6 +5,5 @@ storageOnFinalize({
     metadata: {
         position: '2'
     },
-    name: 'user_photos/LEx6SCm9iePVPfDKNWsEnAyjVG75/some-filename.jpg',
-    resourceState: 'exists'
+    name: 'user_photos/LEx6SCm9iePVPfDKNWsEnAyjVG75/some-filename.jpg'
 });
