@@ -16,7 +16,7 @@ const admin = require('firebase-admin');
 const myFunctions = require('../../../index');
 
 
-describe('dbMessagesOnUpdate function', () => {
+describe('dbMessagesOnCreate function', () => {
     let onceStub;
     let updateStub;
 
@@ -46,24 +46,23 @@ describe('dbMessagesOnUpdate function', () => {
         // set return value for database once call
         const senderResult = {
             ref: { parent: { key: 'sender-id' } },
-            val() {
-                return {
-                    firstName: 'Sender',
-                    photos: ['sender-photo-link']
-                };
-            }
+            val() { return { firstName: 'Sender' }; }
         };
         const recipientResult = {
             ref: { parent: { key: 'recipient-id' } },
-            val() {
-                return {
-                    firstName: 'Recipient',
-                    photos: ['recipient-photo-link']
-                };
-            }
+            val() { return { firstName: 'Recipient' }; }
+        };
+        const senderPhotosResult = {
+            val() { return ['sender-photo-link']; }
+        };
+        const recipientPhotosresult = {
+            val() { return ['recipient-photo-link']; }
         };
         onceStub.onFirstCall().returns(Promise.resolve(senderResult));
-        onceStub.onSecondCall().returns(Promise.resolve(recipientResult));
+        onceStub.onSecondCall().returns(Promise.resolve(senderPhotosResult));
+        onceStub.onThirdCall().returns(Promise.resolve(recipientResult));
+        // onFourthCall
+        onceStub.onCall(3).returns(Promise.resolve(recipientPhotosresult));
 
         // create snapshot and context
         const msgUpdateStub = sandbox.stub().returns(Promise.resolve());

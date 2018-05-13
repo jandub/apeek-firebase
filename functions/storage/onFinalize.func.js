@@ -32,7 +32,7 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
     const db = admin.database();
     const userId = pathParts[1];
 
-    return db.ref(`/users/${userId}/profile/photos`).once('value')
+    return db.ref(`/users/${userId}/photos`).once('value')
         .then(snapshot => {
             // cant save empty array in firebase
             // returns null if user has no photos
@@ -45,7 +45,7 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
 
             userPhotos = getUpdatedUserPhotos(userPhotos, object);
 
-            return db.ref(`/users/${userId}/profile/photos`).set(userPhotos);
+            return db.ref(`/users/${userId}/photos`).set(userPhotos);
         });
 });
 

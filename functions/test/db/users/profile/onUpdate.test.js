@@ -65,8 +65,7 @@ describe('dbUserProfileOnUpdate function', () => {
             lastName: 'Lastname',
             gender: 'male',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['some-photo-link']
+            about: 'Some about 1...'
         };
         const afterData = {
             uid: 'user-id',
@@ -74,8 +73,7 @@ describe('dbUserProfileOnUpdate function', () => {
             lastName: 'Lastname',
             gender: 'male',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['some-photo-link']
+            about: 'Some about 1...'
         };
         const beforeSnap = test.database.makeDataSnapshot(beforeData);
         const afterSnap = test.database.makeDataSnapshot(afterData);
@@ -100,7 +98,7 @@ describe('dbUserProfileOnUpdate function', () => {
             });
     });
 
-    it('Should update users new photo in chats', () => {
+    it('Should not update chats if name is unchanged', () => {
         // set return value for database once call
         const onceResult = {
             val() {
@@ -119,118 +117,7 @@ describe('dbUserProfileOnUpdate function', () => {
             lastName: 'Lastname',
             gender: 'male',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['some-photo-link']
-        };
-        const afterData = {
-            uid: 'user-id',
-            firstName: 'Firstname',
-            lastName: 'Lastname',
-            gender: 'male',
-            interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['new-photo-link']
-        };
-        const beforeSnap = test.database.makeDataSnapshot(beforeData);
-        const afterSnap = test.database.makeDataSnapshot(afterData);
-
-        const change = test.makeChange(beforeSnap, afterSnap);
-        const context = {
-            params: {
-                userId: 'user-id'
-            }
-        };
-
-        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
-
-        return wrapped(change, context)
-            .then(() => {
-                // check the update object
-                const expectedUpdateArgs = {
-                    '/chats/recipient-id-1/chat-uid-1/recipientUserPhoto': 'new-photo-link',
-                    '/chats/recipient-id-2/chat-uid-2/recipientUserPhoto': 'new-photo-link'
-                };
-                expect(updateStub).to.be.calledWith(expectedUpdateArgs);
-            });
-    });
-
-    it('Should update users new name and photo in chats', () => {
-        // set return value for database once call
-        const onceResult = {
-            val() {
-                return {
-                    'chat-uid-1': { recipientId: 'recipient-id-1' },
-                    'chat-uid-2': { recipientId: 'recipient-id-2' }
-                };
-            }
-        };
-        onceStub.returns(Promise.resolve(onceResult));
-
-        // create fake database update event
-        const beforeData = {
-            uid: 'user-id',
-            firstName: 'Firstname',
-            lastName: 'Lastname',
-            gender: 'male',
-            interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['some-photo-link']
-        };
-        const afterData = {
-            uid: 'user-id',
-            firstName: 'NewFirstname',
-            lastName: 'Lastname',
-            gender: 'male',
-            interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['new-photo-link']
-        };
-        const beforeSnap = test.database.makeDataSnapshot(beforeData);
-        const afterSnap = test.database.makeDataSnapshot(afterData);
-
-        const change = test.makeChange(beforeSnap, afterSnap);
-        const context = {
-            params: {
-                userId: 'user-id'
-            }
-        };
-
-        const wrapped = test.wrap(myFunctions.dbUsersProfileOnUpdate);
-
-        return wrapped(change, context)
-            .then(() => {
-                // check the update object
-                const expectedUpdateArgs = {
-                    '/chats/recipient-id-1/chat-uid-1/recipientName': 'NewFirstname',
-                    '/chats/recipient-id-1/chat-uid-1/recipientUserPhoto': 'new-photo-link',
-                    '/chats/recipient-id-2/chat-uid-2/recipientName': 'NewFirstname',
-                    '/chats/recipient-id-2/chat-uid-2/recipientUserPhoto': 'new-photo-link'
-                };
-                expect(updateStub).to.be.calledWith(expectedUpdateArgs);
-            });
-    });
-
-    it('Should not update chats if name and photo are unchanged', () => {
-        // set return value for database once call
-        const onceResult = {
-            val() {
-                return {
-                    'chat-uid-1': { recipientId: 'recipient-id-1' },
-                    'chat-uid-2': { recipientId: 'recipient-id-2' }
-                };
-            }
-        };
-        onceStub.returns(Promise.resolve(onceResult));
-
-        // create fake database update event
-        const beforeData = {
-            uid: 'user-id',
-            firstName: 'Firstname',
-            lastName: 'Lastname',
-            gender: 'male',
-            interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['some-photo-link']
+            about: 'Some about 1...'
         };
         const afterData = {
             uid: 'user-id',
@@ -238,8 +125,7 @@ describe('dbUserProfileOnUpdate function', () => {
             lastName: 'NewLastname',
             gender: 'female',
             interests: 'Some new interests 1...',
-            about: 'Some new about 1...',
-            photos: ['some-photo-link']
+            about: 'Some new about 1...'
         };
         const beforeSnap = test.database.makeDataSnapshot(beforeData);
         const afterSnap = test.database.makeDataSnapshot(afterData);
@@ -272,8 +158,7 @@ describe('dbUserProfileOnUpdate function', () => {
             lastName: 'Lastname',
             gender: 'male',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['some-photo-link']
+            about: 'Some about 1...'
         };
         const afterData = {
             uid: 'user-id',
@@ -281,8 +166,7 @@ describe('dbUserProfileOnUpdate function', () => {
             lastName: 'Lastname',
             gender: 'male',
             interests: 'Some interests 1...',
-            about: 'Some about 1...',
-            photos: ['new-photo-link']
+            about: 'Some about 1...'
         };
         const beforeSnap = test.database.makeDataSnapshot(beforeData);
         const afterSnap = test.database.makeDataSnapshot(afterData);

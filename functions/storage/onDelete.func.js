@@ -32,7 +32,7 @@ module.exports = functions.storage.object().onDelete((object, context) => {
     const db = admin.database();
     const userId = pathParts[1];
 
-    return db.ref(`/users/${userId}/profile/photos`).once('value')
+    return db.ref(`/users/${userId}/photos`).once('value')
         .then(snapshot => {
             const userPhotos = snapshot.val();
             const link = `gs://${object.bucket}/${object.name}`;
@@ -42,6 +42,6 @@ module.exports = functions.storage.object().onDelete((object, context) => {
                 userPhotos.splice(idx, 1);
             }
 
-            return db.ref(`/users/${userId}/profile/photos`).set(userPhotos);
+            return db.ref(`/users/${userId}/photos`).set(userPhotos);
         });
 });

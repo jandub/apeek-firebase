@@ -66,11 +66,13 @@ const handleRequest = (msgSnap, context) => {
 
     return Promise.all([
         db.ref(`/users/${msg.senderId}/profile`).once('value'),
-        db.ref(`/users/${msg.recipientId}/profile`).once('value')
+        db.ref(`/users/${msg.senderId}/photos`).once('value'),
+        db.ref(`/users/${msg.recipientId}/profile`).once('value'),
+        db.ref(`/users/${msg.recipientId}/photos`).once('value')
     ])
-        .then(([senderSnap, recipientSnap]) => {
-            const senderChat = getNewChatObject(senderSnap, msgSnap);
-            const recipientChat = getNewChatObject(recipientSnap, msgSnap);
+        .then(([senderSnap, senderPhotosSnap, recipientSnap, recipientPhotosSnap]) => {
+            const senderChat = getNewChatObject(senderSnap, senderPhotosSnap, msgSnap);
+            const recipientChat = getNewChatObject(recipientSnap, recipientPhotosSnap, msgSnap);
 
             const updates = {};
             updates[`/chats/${msg.recipientId}/${chatId}`] = senderChat;
@@ -80,17 +82,13 @@ const handleRequest = (msgSnap, context) => {
         });
 };
 
-const getNewChatObject = (userSnap, msgSnap) => {
+const getNewChatObject = (userSnap, photosSnap, msgSnap) => {
     const user = userSnap.val();
     const userId = userSnap.ref.parent.key;
+    const photos = photosSnap.val();
+    const photo = photos && photos[0] ? photos[0] : null;
     const msg = msgSnap.val();
     const msgId = msgSnap.key;
-
-    let photo = null;
-
-    if (!!user.photos && !!user.photos[0]) {
-        photo = user.photos[0];
-    }
 
     return {
         recipientId: userId,
@@ -142,9 +140,12 @@ const getChatUpdates = (chatId, msgSnap, newStatus) => {
         newValues.status = newStatus;
     }
 
-    return Object.entries(newValues).reduce((updates, [key, val]) => ({
-        ...updates,
-        [`/chats/${msg.senderId}/${chatId}/${key}`]: val,
-        [`/chats/${msg.recipientId}/${chatId}/${key}`]: val
-    }), {});
+    const updates = {};
+
+    Object.entries(newValues).forEach(([key, val]) => {
+        updates[`/chats/${msg.senderId}/${chatId}/${key}`] = val;
+        updates[`/chats/${msg.recipientId}/${chatId}/${key}`] = val;
+    });
+
+    return updates;
 };

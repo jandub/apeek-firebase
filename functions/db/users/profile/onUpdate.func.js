@@ -24,11 +24,8 @@ module.exports = functions.database
         const newData = change.after.val();
         const oldData = change.before.val();
 
-        const changes = getChanges(newData, oldData);
-
-        if (!changes) {
-            // nothing to update - user has still the same
-            // firstName and profile photo
+        // check if first name got updated
+        if (newData.firstName === oldData.firstName) {
             return true;
         }
 
@@ -39,41 +36,21 @@ module.exports = functions.database
             .then(snap => {
                 const chats = snap.val();
 
+                // no chats to update
                 if (!chats) {
                     return true;
                 }
 
-                const updates = getUpdates(changes, chats);
+                const updates = getUpdates(newData.firstName, chats);
                 return db.ref().update(updates);
             });
     });
 
-const getChanges = (newData, oldData) => {
-    const changes = {};
-
-    // users firstName is stored in chats recipientName attribute
-    if (newData.firstName !== oldData.firstName) {
-        changes.recipientName = newData.firstName;
-    }
-
-    const newPhoto = !!newData.photos && !!newData.photos[0] ? newData.photos[0] : '';
-    const oldPhoto = !!oldData.photos && !!oldData.photos[0] ? oldData.photos[0] : '';
-
-    // users profile photo is stored in chats recipientUserPhoto attribute
-    if (newPhoto !== oldPhoto) {
-        changes.recipientUserPhoto = newPhoto;
-    }
-
-    return Object.keys(changes).length !== 0 ? changes : null;
-};
-
-const getUpdates = (changes, chats) => {
+const getUpdates = (firstName, chats) => {
     const updates = {};
 
     Object.entries(chats).forEach(([chatId, chat]) => {
-        Object.entries(changes).forEach(([attr, newValue]) => {
-            updates[`/chats/${chat.recipientId}/${chatId}/${attr}`] = newValue;
-        });
+        updates[`/chats/${chat.recipientId}/${chatId}/recipientName`] = firstName;
     });
 
     return updates;
