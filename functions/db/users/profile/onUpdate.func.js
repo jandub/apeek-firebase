@@ -1,11 +1,10 @@
 /*
  *  Triggers when users profile gets updated.
  *
- *  When users name or profile photo changes, this function updates it
- *  in the chat nodes.
- *  Every chat node stores recipientName and recipientUserPhoto -
- *  that means the functions needs to find recipient chat objects
- *  and update the new user data there - /chats/recipientId/chatId/
+ *  When users name changes, this function updates it in
+ *  the chat nodes. Every chat node stores recipientName -
+ *  the functions needs to find recipient chat objects and update
+ *  the first name - /chats/recipientId/chatId/recipientName
  */
 
 const functions = require('firebase-functions');
