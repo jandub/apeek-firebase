@@ -16,7 +16,8 @@
         "test": "npm run test:rules && npm run test:functions",
         "test:rules": "node_modules/.bin/mocha \"database/test/**/*.test.js\"",
         "test:functions": "node_modules/.bin/mocha --exit \"functions/test/**/*.test.js\"",
-        "eslint": "node_modules/.bin/eslint --ignore-path .gitignore ."
+        "eslint": "node_modules/.bin/eslint --ignore-path .gitignore .",
+        "serve": "node_modules/.bin/firebase serve --only functions"
     },
     "devDependencies": {
         "chai": "^4.1.2",
