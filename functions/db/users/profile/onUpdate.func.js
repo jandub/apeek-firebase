@@ -48,8 +48,8 @@ module.exports = functions.database
 const getUpdates = (firstName, chats) => {
     const updates = {};
 
-    Object.entries(chats).forEach(([chatId, chat]) => {
-        updates[`/chats/${chat.recipientId}/${chatId}/recipientName`] = firstName;
+    Object.keys(chats).forEach(chatId => {
+        updates[`/chats/${chats[chatId].recipientId}/${chatId}/recipientName`] = firstName;
     });
 
     return updates;

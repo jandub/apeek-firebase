@@ -142,9 +142,9 @@ const getChatUpdates = (chatId, msgSnap, newStatus) => {
 
     const updates = {};
 
-    Object.entries(newValues).forEach(([key, val]) => {
-        updates[`/chats/${msg.senderId}/${chatId}/${key}`] = val;
-        updates[`/chats/${msg.recipientId}/${chatId}/${key}`] = val;
+    Object.keys(newValues).forEach(key => {
+        updates[`/chats/${msg.senderId}/${chatId}/${key}`] = newValues[key];
+        updates[`/chats/${msg.recipientId}/${chatId}/${key}`] = newValues[key];
     });
 
     return updates;
