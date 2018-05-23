@@ -38,6 +38,13 @@ module.exports = functions.storage.object().onFinalize((object, context) => {
             // returns null if user has no photos
             let userPhotos = snapshot.val() || [];
 
+            // check if the file link is already in photos array
+            // sometimes this function triggers multiple times
+            // See https://stackoverflow.com/questions/50227340
+            if (userPhotos.indexOf(getFileLink(object)) !== -1) {
+                return true;
+            }
+
             // user has already maximum amount of photos
             if (userPhotos.length === consts.USER_PHOTOS_MAX) {
                 return deleteFile(filePath);
@@ -58,7 +65,7 @@ const deleteFile = path => {
 };
 
 const getUpdatedUserPhotos = (photos, object) => {
-    const link = `gs://${object.bucket}/${object.name}`;
+    const link = getFileLink(object);
     const position = getPositionFromMeta(object.metadata);
 
     if (!position || position > photos.length) {
@@ -68,6 +75,10 @@ const getUpdatedUserPhotos = (photos, object) => {
     }
 
     return photos;
+};
+
+const getFileLink = object => {
+    return `gs://${object.bucket}/${object.name}`;
 };
 
 const getPositionFromMeta = meta => {

@@ -222,4 +222,29 @@ describe('storageOnFinalize function', () => {
 
         expect(myFunctions.storageOnFinalize(fakeEvent)).to.be.eventually.true;
     });
+
+    it('Should not add file link to photos array if the link is already there', () => {
+        // set return value for once call to users profile photos
+        const photos = [
+            'gs://some-bucket/user_photos/user1/some-filename.jpg'
+        ];
+        onceStub.returns(Promise.resolve({
+            val: () => { return photos; }
+        }));
+
+        // create fake event
+        const fakeEvent = {
+            data: {
+                bucket: 'some-bucket',
+                name: 'user_photos/user1/some-filename.jpg'
+            }
+        };
+
+        return myFunctions.storageOnFinalize(fakeEvent)
+            .then(() => {
+                // check if delete was not called
+                expect(deleteStub).not.to.be.called;
+                expect(setStub).not.to.be.called;
+            });
+    });
 });
