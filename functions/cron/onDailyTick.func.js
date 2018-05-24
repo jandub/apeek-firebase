@@ -5,13 +5,7 @@
  */
 
 const functions = require('firebase-functions');
-
-// admin SDK can be only initialized once, wrap in try-catch
-const admin = require('firebase-admin');
-try {
-    admin.initializeApp();
-// eslint-disable-next-line no-empty
-} catch (e) {}
+const admin = require('../admin');
 
 
 module.exports = functions.pubsub

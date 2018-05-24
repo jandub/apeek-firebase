@@ -9,12 +9,7 @@
  *                  with three photos in db
  */
 
-// admin SDK can be only initialized once, wrap in try-catch
-const admin = require('firebase-admin');
-try {
-    admin.initializeApp();
-    // eslint-disable-next-line no-empty
-} catch (e) { }
+const admin = require('../../../admin');
 
 const consts = require('../../../constants');
 
