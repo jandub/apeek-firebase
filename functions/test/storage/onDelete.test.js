@@ -93,4 +93,42 @@ describe('storageOnDelete function', () => {
 
         expect(myFunctions.storageOnDelete(fakeEvent)).to.be.eventually.true;
     });
+
+    it('Should not save photos array if deleted file link is not in it', () => {
+        // set return value for once call to users profile photos
+        const photos = ['link1', 'link2'];
+        onceStub.returns(Promise.resolve({
+            val: () => { return photos; }
+        }));
+
+        // create fake event
+        const fakeEvent = {
+            data: {
+                bucket: 'some-bucket',
+                name: 'temp/user1/filename.jpg'
+            }
+        };
+
+        expect(setStub).not.to.be.called;
+        expect(myFunctions.storageOnDelete(fakeEvent)).to.be.eventually.true;
+    });
+
+    it('Should not save photos array if it is originally empty', () => {
+        // set return value for once call to users profile photos
+        const photos = null;
+        onceStub.returns(Promise.resolve({
+            val: () => { return photos; }
+        }));
+
+        // create fake event
+        const fakeEvent = {
+            data: {
+                bucket: 'some-bucket',
+                name: 'temp/user1/filename.jpg'
+            }
+        };
+
+        expect(setStub).not.to.be.called;
+        expect(myFunctions.storageOnDelete(fakeEvent)).to.be.eventually.true;
+    });
 });

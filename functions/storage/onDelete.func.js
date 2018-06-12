@@ -27,14 +27,15 @@ module.exports = functions.storage.object().onDelete((object, context) => {
 
     return db.ref(`/users/${userId}/photos`).once('value')
         .then(snapshot => {
-            const userPhotos = snapshot.val();
+            const userPhotos = snapshot.val() || [];
             const link = `gs://${object.bucket}/${object.name}`;
             const idx = userPhotos.indexOf(link);
 
-            if (idx !== -1) {
-                userPhotos.splice(idx, 1);
+            if (idx === -1) {
+                return true;
             }
 
+            userPhotos.splice(idx, 1);
             return db.ref(`/users/${userId}/photos`).set(userPhotos);
         });
 });
