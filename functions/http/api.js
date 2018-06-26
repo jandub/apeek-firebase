@@ -6,7 +6,7 @@ const functions = require('firebase-functions');
 
 // middleware
 const cors = require('cors');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 // init express app
 const express = require('express');
@@ -16,7 +16,6 @@ app.use(cors({ origin: true }));
 app.use(auth);
 
 // routes
-const reorderPhotos = require('./photos/reorder');
-app.post('/photos/reorder', reorderPhotos);
+app.post('/users/photos/order', require('./users/photos/order'));
 
 module.exports = functions.https.onRequest(app);

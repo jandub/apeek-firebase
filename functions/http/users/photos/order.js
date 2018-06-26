@@ -2,7 +2,7 @@
  *  Http function to reorder users photos.
  *
  *  Method: POST
- *  Endpoint: /photos/reorder
+ *  Endpoint: /users/photos/order
  *  Params:
  *      order   Array of integers - new order of photos
  *              Example: [3, 2, 1] for authenticated user

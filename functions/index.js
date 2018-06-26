@@ -23,3 +23,6 @@ files.forEach(file => {
         exports[functionName] = require(file);
     }
 });
+
+// export api separately to get pretty urls
+exports.api = require('./http/api.js');

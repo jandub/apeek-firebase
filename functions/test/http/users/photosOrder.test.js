@@ -10,10 +10,10 @@ const sinon = require('sinon');
 const sandbox = sinon.sandbox.create();
 
 const admin = require('firebase-admin');
-const reorder = require.main.require('functions/http/users/photos/reorder');
+const reorder = require.main.require('functions/http/users/photos/order');
 
 
-describe('httpUsersPhotosReorder function', () => {
+describe('httpUsersPhotosOrder function', () => {
     let setStub;
     let onceStub;
     let response;
